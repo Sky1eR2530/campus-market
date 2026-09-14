@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import type { Item } from '@campus/shared'
+import { formatRelativeTime } from '@campus/shared'
 import { computed } from 'vue'
 import AppImage from '@/components/ui/AppImage.vue'
 import FavoriteButton from './FavoriteButton.vue'
 import ItemStatusTag from './ItemStatusTag.vue'
 import PriceText from './PriceText.vue'
-import { formatRelativeTime } from '@campus/shared'
 
 const props = withDefaults(
   defineProps<{
@@ -25,31 +25,39 @@ const isInactive = computed(() => props.item.status !== 'on_sale')
 </script>
 
 <template>
-  <article class="item-card" :class="{ 'item-card--inactive': isInactive }">
+  <!--
+    这里刻意不是一个「卡片」：没有边框、没有底色、没有阴影。
+    整屏二十个一模一样的圆角盒子是模板站点的典型特征，
+    而这个页面真正要突出的是照片和价格，不是容器。
+  -->
+  <article class="item-card">
     <RouterLink
       class="item-card__link"
       :to="{ name: 'item-detail', params: { id: item.id } }"
       :aria-label="`查看商品：${item.title}`"
     >
-      <div class="item-card__media">
+      <div class="item-card__media" :class="{ 'is-inactive': isInactive }">
         <AppImage :src="cover" :alt="item.title" ratio="4 / 3" />
         <span v-if="isInactive" class="item-card__status">
           <ItemStatusTag :status="item.status" />
         </span>
       </div>
 
-      <div class="item-card__body">
-        <component :is="`h${headingLevel}`" class="item-card__title clamp-2">
-          {{ item.title }}
-        </component>
+      <!--
+        价格紧贴照片，而不是压在标题下面。
+        二手交易里价格是第一筛选条件，而且照片高度固定，
+        价格因此能横向连成一条线——一眼扫过去就能比较贵贱。
+      -->
+      <PriceText class="item-card__price" :cents="item.priceCents" size="lg" :muted="isInactive" />
 
-        <PriceText :cents="item.priceCents" size="md" :muted="isInactive" />
+      <component :is="`h${headingLevel}`" class="item-card__title clamp-2">
+        {{ item.title }}
+      </component>
 
-        <div class="item-card__meta">
-          <span class="item-card__seller truncate">{{ item.seller?.nickname ?? '匿名用户' }}</span>
-          <span class="item-card__time">{{ formatRelativeTime(item.publishedAt) }}</span>
-        </div>
-      </div>
+      <p class="item-card__meta">
+        <span class="item-card__seller truncate">{{ item.seller?.nickname ?? '匿名用户' }}</span>
+        <span class="item-card__time">{{ formatRelativeTime(item.publishedAt) }}</span>
+      </p>
     </RouterLink>
 
     <div class="item-card__fav">
@@ -61,56 +69,54 @@ const isInactive = computed(() => props.item.status !== 'on_sale')
 <style scoped>
 .item-card {
   position: relative;
-  overflow: hidden;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-lg);
-  transition: border-color var(--transition-fast), box-shadow var(--transition-base),
-    transform var(--transition-base);
-}
-
-.item-card:hover {
-  border-color: var(--color-primary-200);
-  box-shadow: var(--shadow-md);
-  transform: translateY(-2px);
-}
-
-.item-card--inactive .item-card__title,
-.item-card--inactive .item-card__meta {
-  color: var(--text-tertiary);
-}
-
-/*
- * 只对图片本身降透明度。
- * 之前是给整个媒体区加 opacity，结果叠在上面的状态标签也跟着变淡，
- * 对比度掉到 3.31:1（低于 AA 要求的 4.5:1）。
- */
-.item-card--inactive .item-card__media :deep(.app-image) {
-  opacity: 0.72;
 }
 
 .item-card__link {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
 }
 
 .item-card__media {
   position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  background: var(--bg-subtle);
+}
+
+/*
+ * 用一圈内描边表达可点击，而不是位移 + 阴影。
+ * 满屏的卡片一起上浮是模板感最重的一种做法；
+ * 这里只让悬停的那一张的边界变清晰。
+ */
+.item-card__media::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 2px var(--color-primary-500);
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+  pointer-events: none;
+}
+
+.item-card:hover .item-card__media::after {
+  opacity: 1;
 }
 
 .item-card__status {
   position: absolute;
   top: var(--space-2);
   left: var(--space-2);
-  padding: 2px;
+  overflow: hidden;
   border-radius: var(--radius-sm);
-  background: rgba(255, 255, 255, 0.9);
+  /* 状态标签有自己的浅色底，加一点阴影才能从照片上分离出来 */
+  box-shadow: var(--shadow-xs);
 }
 
-.item-card__body {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  padding: var(--space-3);
+.item-card__price {
+  /* 收紧与照片的距离，让价格读起来像照片的价签 */
+  margin-top: calc(var(--space-1) * -1);
 }
 
 .item-card__title {
@@ -118,7 +124,11 @@ const isInactive = computed(() => props.item.status !== 'on_sale')
   font-weight: var(--weight-medium);
   line-height: var(--leading-normal);
   color: var(--text-primary);
-  min-height: calc(var(--text-base) * var(--leading-normal) * 2);
+  transition: color var(--transition-fast);
+}
+
+.item-card:hover .item-card__title {
+  color: var(--color-primary-700);
 }
 
 .item-card__meta {
@@ -126,14 +136,12 @@ const isInactive = computed(() => props.item.status !== 'on_sale')
   align-items: center;
   justify-content: space-between;
   gap: var(--space-2);
-  padding-top: var(--space-2);
-  border-top: 1px solid var(--color-neutral-100);
   font-size: var(--text-xs);
   color: var(--text-tertiary);
 }
 
 .item-card__seller {
-  max-width: 60%;
+  max-width: 62%;
 }
 
 .item-card__time {
@@ -144,5 +152,14 @@ const isInactive = computed(() => props.item.status !== 'on_sale')
   position: absolute;
   top: var(--space-2);
   right: var(--space-2);
+}
+
+/*
+ * 已售/下架的商品让照片退后，但状态标签要保持原样。
+ * 之前给整个媒体区加 opacity，叠在上面的标签会被一起变淡，
+ * 对比度掉到 4.23:1，低于 WCAG AA 的 4.5:1。
+ */
+.item-card__media.is-inactive :deep(.app-image) {
+  opacity: 0.8;
 }
 </style>

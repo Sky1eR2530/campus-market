@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import type { Category, Item } from '@campus/shared'
-import { APP_DESCRIPTION, APP_NAME, APP_TAGLINE } from '@campus/shared'
+import { APP_NAME, APP_TAGLINE } from '@campus/shared'
+import { fetchCategories, fetchItems } from '@campus/api-client'
+import { AppIcon, useAsync } from '@campus/ui'
+import type { IconName } from '@campus/ui'
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { fetchCategories, fetchItems } from '@campus/api-client'
 import CategoryCard from '@/components/business/CategoryCard.vue'
 import ItemGrid from '@/components/business/ItemGrid.vue'
 import SearchBar from '@/components/business/SearchBar.vue'
-import { AppIcon, useAsync } from '@campus/ui'
-import type { IconName } from '@campus/ui'
 import { usePageMeta } from '@/composables/usePageMeta'
 import { useAuthStore } from '@/stores/auth'
 
@@ -23,44 +23,39 @@ usePageMeta(`${APP_NAME} · ${APP_TAGLINE}`)
 
 const latestItems = computed<Item[]>(() => latest.data.value?.data ?? [])
 const categoryList = computed<Category[]>(() => categories.data.value ?? [])
-const onSaleTotal = computed(() =>
-  categoryList.value.reduce((sum, category) => sum + category.itemCount, 0)
-)
 
 interface QuickEntry {
   label: string
-  hint: string
   icon: IconName
   to: { name: string }
+  /** 需要登录才能使用 */
+  private?: boolean
 }
 
 const QUICK_ENTRIES: QuickEntry[] = [
-  { label: '发布闲置', hint: '拍照上传，一分钟搞定', icon: 'camera', to: { name: 'publish' } },
-  { label: '我的收藏', hint: '随时找回心动好物', icon: 'heart', to: { name: 'me-favorites' } },
-  { label: '浏览分类', hint: '按类别快速筛选', icon: 'grid', to: { name: 'categories' } },
-  { label: '我的发布', hint: '管理状态与信息', icon: 'inbox', to: { name: 'me-items' } }
+  { label: '发布闲置', icon: 'camera', to: { name: 'publish' }, private: true },
+  { label: '我的收藏', icon: 'heart', to: { name: 'me-favorites' }, private: true },
+  { label: '我的发布', icon: 'inbox', to: { name: 'me-items' }, private: true },
+  { label: '全部分类', icon: 'grid', to: { name: 'categories' } }
 ]
 
-const FEATURES: { icon: IconName; title: string; desc: string }[] = [
+/**
+ * 三条平台说明。
+ * 这里刻意不用四张一模一样的功能卡片——那是最容易让页面看起来像模板的做法。
+ * 用平铺的短句反而更像产品自己在说话。
+ */
+const INTRO: { title: string; body: string }[] = [
   {
-    icon: 'location',
-    title: '同校交易',
-    desc: '卖家和买家都在同一个校园，约在宿舍楼下或食堂就能当面验货。'
+    title: '卖家就在同一个校园里',
+    body: '约在宿舍楼下、食堂门口就能看货，不用寄快递，也不用等物流。'
   },
   {
-    icon: 'camera',
-    title: '真实图片',
-    desc: '图片由卖家现场拍摄上传，成色和细节一眼看清，不用来回追问。'
+    title: '图片是卖家自己拍的',
+    body: '成色和细节一眼就能看清，省掉来回追问的时间。'
   },
   {
-    icon: 'tag',
-    title: '状态清晰',
-    desc: '在售、已售、下架三种状态由卖家随时更新，不必再问「还在吗」。'
-  },
-  {
-    icon: 'shield',
-    title: '免费发布',
-    desc: '发布和浏览都不收费，卖出之后把状态改成已售即可。'
+    title: '价格就是实价',
+    body: '二手就是二手，标多少是多少，不玩先涨后降那一套。'
   }
 ]
 
@@ -70,8 +65,8 @@ function onSearch(value: string): void {
 
 function goQuick(entry: QuickEntry): void {
   // 需要登录的入口在未登录时先引导登录，登录后自动回到目标页面
-  if (!auth.isAuthenticated && ['publish', 'me-favorites', 'me-items'].includes(entry.to.name)) {
-    void router.push({ name: 'login', query: { redirect: `/` } })
+  if (entry.private && !auth.isAuthenticated) {
+    void router.push({ name: 'login', query: { redirect: '/' } })
     return
   }
   void router.push({ name: entry.to.name })
@@ -80,58 +75,49 @@ function goQuick(entry: QuickEntry): void {
 
 <template>
   <div class="home">
+    <!--
+      首屏不放「大数字 + 统计条 + 渐变装饰」那一套。
+      这里是个市场，最有说服力的东西是货，所以把最新发布直接提到首屏下面。
+    -->
     <section class="hero">
       <div class="container hero__inner">
-        <p class="hero__eyebrow">
-          <AppIcon name="sparkle" :size="14" />
-          <span>{{ APP_TAGLINE }}</span>
+        <!--
+          用两个内联块控制断行位置：中文可以任意字间换行，
+          不控制的话标题会在「交」字处断开，把「交给」这个词切开。
+        -->
+        <h1 class="hero__title">
+          <span class="hero__title-part">把用不上的，</span>
+          <span class="hero__title-part">交给正需要的同学</span>
+        </h1>
+        <p class="hero__lede">
+          同校当面交易，不用寄快递，也不用等物流。
         </p>
-        <h1 class="hero__title">把用不上的，交给正需要的同学</h1>
-        <p class="hero__desc">{{ APP_DESCRIPTION }}</p>
 
         <div class="hero__search">
           <SearchBar
             v-model="keyword"
             size="lg"
             label="首页搜索"
-            placeholder="搜索书名、数码、生活用品…"
+            placeholder="搜书名、数码、生活用品…"
             @submit="onSearch"
           />
         </div>
 
-        <p class="hero__stats">
-          <span>当前在售 {{ onSaleTotal }} 件</span>
-          <span class="hero__dot">·</span>
-          <span>{{ categoryList.length }} 个分类</span>
-        </p>
+        <ul class="quick">
+          <li v-for="entry in QUICK_ENTRIES" :key="entry.label">
+            <button class="quick__item" type="button" @click="goQuick(entry)">
+              <AppIcon :name="entry.icon" :size="16" />
+              <span>{{ entry.label }}</span>
+            </button>
+          </li>
+        </ul>
       </div>
-    </section>
-
-    <section class="container quick">
-      <ul class="quick__list">
-        <li v-for="entry in QUICK_ENTRIES" :key="entry.label">
-          <button class="quick__item" type="button" @click="goQuick(entry)">
-            <span class="quick__icon"><AppIcon :name="entry.icon" :size="20" /></span>
-            <span class="quick__body">
-              <span class="quick__label">{{ entry.label }}</span>
-              <span class="quick__hint">{{ entry.hint }}</span>
-            </span>
-            <AppIcon class="quick__arrow" name="chevronRight" :size="16" />
-          </button>
-        </li>
-      </ul>
     </section>
 
     <section class="container section">
       <header class="section__head">
-        <div>
-          <h2 class="section-title">按分类逛</h2>
-          <p class="section__desc">先选类别，再挑具体商品，找起来更快。</p>
-        </div>
-        <RouterLink class="section__more" :to="{ name: 'categories' }">
-          <span>全部分类</span>
-          <AppIcon name="chevronRight" :size="15" />
-        </RouterLink>
+        <h2 class="section__title">按分类逛</h2>
+        <RouterLink class="section__more" :to="{ name: 'categories' }">全部分类</RouterLink>
       </header>
 
       <div v-if="categories.loading.value" class="category-grid">
@@ -144,14 +130,8 @@ function goQuick(entry: QuickEntry): void {
 
     <section class="container section">
       <header class="section__head">
-        <div>
-          <h2 class="section-title">最新发布</h2>
-          <p class="section__desc">刚刚上架的闲置，可能正好是你需要的。</p>
-        </div>
-        <RouterLink class="section__more" :to="{ name: 'items' }">
-          <span>查看全部</span>
-          <AppIcon name="chevronRight" :size="15" />
-        </RouterLink>
+        <h2 class="section__title">最新发布</h2>
+        <RouterLink class="section__more" :to="{ name: 'items' }">查看全部</RouterLink>
       </header>
 
       <ItemGrid
@@ -172,29 +152,22 @@ function goQuick(entry: QuickEntry): void {
       </ItemGrid>
     </section>
 
-    <section class="container section">
-      <header class="section__head">
-        <div>
-          <h2 class="section-title">为什么用{{ APP_NAME }}</h2>
-          <p class="section__desc">不追求功能多，只把「同校闲置流转」这件事做顺。</p>
+    <section class="container section intro">
+      <h2 class="section__title">为什么用{{ APP_NAME }}</h2>
+      <div class="intro__grid">
+        <div v-for="entry in INTRO" :key="entry.title" class="intro__item">
+          <h3 class="intro__title">{{ entry.title }}</h3>
+          <p class="intro__body">{{ entry.body }}</p>
         </div>
-      </header>
-
-      <ul class="feature-grid">
-        <li v-for="feature in FEATURES" :key="feature.title" class="feature card card--pad">
-          <span class="feature__icon"><AppIcon :name="feature.icon" :size="20" /></span>
-          <h3 class="feature__title">{{ feature.title }}</h3>
-          <p class="feature__desc">{{ feature.desc }}</p>
-        </li>
-      </ul>
+      </div>
     </section>
   </div>
 </template>
 
 <style scoped>
 .hero {
-  padding-block: var(--space-8) var(--space-6);
-  background: linear-gradient(180deg, var(--color-primary-50) 0%, var(--bg-page) 100%);
+  padding-block: var(--space-6) var(--space-5);
+  background: var(--color-primary-50);
   border-bottom: 1px solid var(--border-default);
 }
 
@@ -205,29 +178,19 @@ function goQuick(entry: QuickEntry): void {
   gap: var(--space-3);
 }
 
-.hero__eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: 5px var(--space-3);
-  border-radius: var(--radius-full);
-  background: rgba(255, 255, 255, 0.8);
-  border: 1px solid var(--color-primary-200);
-  color: var(--color-primary-700);
-  font-size: var(--text-xs);
-  font-weight: var(--weight-medium);
-}
-
 .hero__title {
-  max-width: 20ch;
-  font-size: 1.75rem;
+  font-size: 1.375rem;
   font-weight: var(--weight-bold);
   letter-spacing: -0.02em;
-  line-height: 1.25;
+  line-height: 1.28;
 }
 
-.hero__desc {
-  max-width: 46ch;
+.hero__title-part {
+  display: inline-block;
+}
+
+.hero__lede {
+  max-width: 38rem;
   color: var(--text-secondary);
   line-height: var(--leading-relaxed);
 }
@@ -235,109 +198,58 @@ function goQuick(entry: QuickEntry): void {
 .hero__search {
   width: 100%;
   max-width: 560px;
+  margin-top: var(--space-1);
+}
+
+/* ---------- 快捷入口：一行文字按钮，不做成一组卡片 ---------- */
+.quick {
+  /* 移动端两列，避免四个按钮断成 3+1 这种像是意外换行的排布 */
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  justify-items: start;
+  gap: var(--space-2);
   margin-top: var(--space-2);
 }
 
-.hero__stats {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  font-size: var(--text-sm);
-  color: var(--text-tertiary);
-}
-
-.hero__dot {
-  color: var(--color-neutral-300);
-}
-
-.quick {
-  margin-top: calc(var(--space-5) * -1);
-}
-
-.quick__list {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-3);
-  padding: var(--space-3);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-xl);
-  background: var(--bg-surface);
-  box-shadow: var(--shadow-md);
-}
-
 .quick__item {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: var(--space-2);
-  width: 100%;
-  padding: var(--space-2);
-  border-radius: var(--radius-md);
-  text-align: left;
-  transition: background-color var(--transition-fast);
+  gap: 6px;
+  height: 34px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-full);
+  background: var(--bg-surface);
+  border: 1px solid var(--color-primary-200);
+  color: var(--color-primary-700);
+  font-size: var(--text-sm);
+  transition: background-color var(--transition-fast), border-color var(--transition-fast);
 }
 
 .quick__item:hover {
-  background: var(--color-primary-50);
+  background: var(--bg-surface);
+  border-color: var(--color-primary-400);
 }
 
-.quick__icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex: none;
-  width: 38px;
-  height: 38px;
-  border-radius: var(--radius-md);
-  background: var(--color-primary-50);
-  color: var(--color-primary-600);
-}
-
-.quick__body {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.quick__label {
-  font-size: var(--text-base);
-  font-weight: var(--weight-medium);
-}
-
-.quick__hint {
-  font-size: var(--text-xs);
-  color: var(--text-tertiary);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.quick__arrow {
-  margin-left: auto;
-  color: var(--color-neutral-300);
-}
-
+/* ---------- 区块 ---------- */
 .section {
-  margin-top: var(--space-10);
+  margin-top: var(--space-8);
 }
 
 .section__head {
   display: flex;
-  align-items: flex-end;
+  align-items: baseline;
   justify-content: space-between;
   gap: var(--space-4);
   margin-bottom: var(--space-4);
 }
 
-.section__desc {
-  margin-top: var(--space-1);
-  font-size: var(--text-sm);
-  color: var(--text-tertiary);
+.section__title {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  letter-spacing: -0.01em;
 }
 
 .section__more {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
   flex: none;
   font-size: var(--text-sm);
   color: var(--color-primary-600);
@@ -345,88 +257,70 @@ function goQuick(entry: QuickEntry): void {
 
 .section__more:hover {
   color: var(--color-primary-700);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .category-grid {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--space-3);
-}
-
-.category-skeleton {
-  height: 72px;
-  border-radius: var(--radius-lg);
-}
-
-.feature-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--space-3);
-}
-
-.feature {
-  display: flex;
-  flex-direction: column;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--space-2);
 }
 
-.feature__icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-md);
-  background: var(--color-primary-50);
-  color: var(--color-primary-600);
+.category-skeleton {
+  height: 104px;
+  border-radius: var(--radius-lg);
 }
 
-.feature__title {
+/* ---------- 平台说明：平铺短句，不是一组卡片 ---------- */
+.intro__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-5);
+  margin-top: var(--space-4);
+}
+
+.intro__title {
   font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+  margin-bottom: var(--space-1);
 }
 
-.feature__desc {
-  font-size: var(--text-sm);
+.intro__body {
+  font-size: var(--text-base);
   color: var(--text-secondary);
   line-height: var(--leading-relaxed);
 }
 
 @media (min-width: 768px) {
   .hero {
-    padding-block: var(--space-12) var(--space-8);
+    padding-block: var(--space-10) var(--space-8);
   }
 
   .hero__title {
-    max-width: 24ch;
-    font-size: 2.25rem;
+    font-size: 2rem;
   }
 
-  .hero__desc {
+  .hero__lede {
     font-size: var(--text-md);
   }
 
-  .quick__list {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-
   .category-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--space-4);
+    grid-template-columns: repeat(6, minmax(0, 1fr));
   }
 
-  .feature-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--space-4);
+  .quick {
+    grid-template-columns: repeat(4, auto);
+    justify-content: start;
   }
-}
 
-@media (min-width: 1024px) {
-  .category-grid {
+  .intro__grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-8);
   }
 
-  .feature-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+  .section {
+    margin-top: var(--space-12);
   }
 }
 </style>

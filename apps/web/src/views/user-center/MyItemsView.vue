@@ -173,11 +173,8 @@ const emptyTitle = computed(() => {
 
           <div class="row__meta">
             <PriceText :cents="item.priceCents" size="sm" :muted="item.status !== 'on_sale'" />
-            <span class="row__dot">·</span>
             <span>{{ item.categoryName }}</span>
-            <span class="row__dot">·</span>
             <span>{{ formatRelativeTime(item.publishedAt) }}</span>
-            <span class="row__dot">·</span>
             <span>{{ item.viewCount }} 次浏览</span>
           </div>
 
@@ -334,14 +331,10 @@ const emptyTitle = computed(() => {
 .row__meta {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-3);
   flex-wrap: wrap;
   font-size: var(--text-xs);
   color: var(--text-tertiary);
-}
-
-.row__dot {
-  color: var(--color-neutral-300);
 }
 
 .row__actions {

@@ -2,54 +2,62 @@
    设计令牌
    ---------------------------------------------------------------------------
    所有颜色、间距、圆角、阴影只在这里定义一次，组件内通过 var() 引用。
-   调整视觉风格只需改这一个文件，不会出现散落各处的硬编码色值。
+   调整视觉风格只需改这一个文件，学生端与管理端会同时生效。
+
+   方向说明：
+   这是一个校园二手交易平台。用户在课间用手机刷几分钟，
+   想知道的是「这件东西值不值、卖家靠不靠谱」。
+   因此配色比常见的 SaaS 蓝更沉、更机构化，把画面里最亮的位置让给商品照片；
+   价格是唯一允许「响」的元素，其余一律克制。
    =========================================================================== */
 
 :root {
-  /* ---------- 品牌色：深皇家蓝，用于主按钮、链接、选中态 ---------- */
-  --color-primary-50: #f2f5ff;
-  --color-primary-100: #e3e9ff;
-  --color-primary-200: #c6d2ff;
-  --color-primary-300: #9fb0fb;
-  --color-primary-400: #7189f5;
-  --color-primary-500: #4a66e8;
-  --color-primary-600: #2a4fd8;
-  --color-primary-700: #1f3ca8;
-  --color-primary-800: #182e7f;
+  /* ---------- 主色：靛蓝 ----------
+     刻意比通用的亮蓝更暗、饱和度更低：它承担按钮与链接，不该抢照片的注意力。 */
+  --color-primary-50: #f1f4fa;
+  --color-primary-100: #e0e7f4;
+  --color-primary-200: #c3d0e8;
+  --color-primary-300: #9aafd4;
+  --color-primary-400: #6d89bd;
+  --color-primary-500: #4566a4;
+  --color-primary-600: #2a4a94;
+  --color-primary-700: #1f3975;
+  --color-primary-800: #182c58;
   --color-primary: var(--color-primary-600);
   --color-primary-hover: var(--color-primary-700);
 
-  /* ---------- 强调色：价格专用，与品牌色区分 ---------- */
-  --color-accent-50: #fff1ec;
-  --color-accent-500: #f2542d;
-  /* 600 用于价格文字：需要在白色背景上达到 4.5:1，比 500 再深一档 */
-  --color-accent-600: #cc3a15;
-  --color-accent: var(--color-accent-500);
+  /* ---------- 强调色：砖红，只用于价格 ----------
+     价格是列表里被扫视最多的信息，值得一个专属颜色；
+     用在别处就会稀释它的作用。 */
+  --color-accent-50: #fdf0ec;
+  --color-accent-500: #c2461f;
+  --color-accent-600: #b23a1e;
+  --color-accent: var(--color-accent-600);
 
-  /* ---------- 中性色阶：承担 90% 的界面 ---------- */
+  /* ---------- 中性色阶：偏冷，让商品照片的暖色不至于发灰 ---------- */
   --color-neutral-0: #ffffff;
   --color-neutral-25: #fbfcfd;
-  --color-neutral-50: #f6f8fa;
-  --color-neutral-100: #eef1f5;
-  --color-neutral-200: #e1e5ec;
-  --color-neutral-300: #c8cfda;
-  --color-neutral-400: #98a2b3;
-  --color-neutral-500: #6b7688;
-  --color-neutral-600: #4e5866;
-  --color-neutral-700: #38414e;
-  --color-neutral-800: #232a34;
-  --color-neutral-900: #141a22;
+  --color-neutral-50: #f4f5f7;
+  --color-neutral-100: #edeff3;
+  --color-neutral-200: #e1e4ea;
+  --color-neutral-300: #c8cdd7;
+  --color-neutral-400: #98a0ae;
+  --color-neutral-500: #6b7280;
+  --color-neutral-600: #4e5563;
+  --color-neutral-700: #383f4b;
+  --color-neutral-800: #232932;
+  --color-neutral-900: #14181f;
 
   /* ---------- 语义色 ---------- */
-  --color-success-50: #e7f7f0;
-  --color-success-500: #10a16e;
-  --color-success-700: #0a6f4c;
-  --color-warning-50: #fff5e6;
-  --color-warning-500: #d97a0b;
-  --color-warning-700: #9a5606;
-  --color-danger-50: #feecec;
-  --color-danger-500: #dc3545;
-  --color-danger-700: #a3202d;
+  --color-success-50: #e8f6ef;
+  --color-success-500: #0f9d6b;
+  --color-success-700: #0a6c4a;
+  --color-warning-50: #fff4e5;
+  --color-warning-500: #d2760a;
+  --color-warning-700: #965205;
+  --color-danger-50: #fdeceb;
+  --color-danger-500: #cf3223;
+  --color-danger-700: #9c2418;
 
   /* ---------- 语义化映射：组件里优先用这一组 ---------- */
   --bg-page: var(--color-neutral-50);
@@ -60,14 +68,25 @@
   --border-strong: var(--color-neutral-300);
   --text-primary: var(--color-neutral-900);
   --text-secondary: var(--color-neutral-600);
-  /*
-   * 这两个值决定「次要文字」是否达标。
-   * neutral-500 在页面底色 #f6f8fa 上只有约 4.3:1，不到 WCAG AA 要求的 4.5:1，
-   * 因此单独取一个更深的灰；placeholder 用 neutral-500 即可（输入框底色是纯白）。
-   */
-  --text-tertiary: #5f6a7a;
+  /* 5.1:1（在页面底色上）——低于这个值就达不到 WCAG AA */
+  --text-tertiary: #5f6875;
   --text-placeholder: var(--color-neutral-500);
   --text-inverse: var(--color-neutral-0);
+
+  /* ---------- 字体 ----------
+     中文界面不引入网络字体：一套完整的 CJK 字体动辄数 MB，
+     首屏代价远超它带来的风格收益。因此用系统字体，
+     但显式指定优先顺序，避免落到默认的宋体。 */
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI Variable', 'Segoe UI', 'PingFang SC',
+    'HarmonyOS Sans SC', 'MiSans', 'Hiragino Sans GB', 'Microsoft YaHei UI', 'Microsoft YaHei',
+    'Helvetica Neue', Arial, sans-serif;
+  /*
+   * 价格专用：衬线数字。
+   * 中文电商的价格清一色是粗黑体，衬线数字传达的是「实价」而不是「促销」，
+   * 正好对上一个二手交易平台该有的语气。
+   * Georgia 默认是旧式数字，需要显式指定 lining-nums 才能和 ¥ 对齐。
+   */
+  --font-numeric: Georgia, 'Times New Roman', 'Songti SC', 'SimSun', serif;
 
   /* ---------- 字号 ---------- */
   --text-xs: 0.75rem;
@@ -99,7 +118,9 @@
   --space-12: 48px;
   --space-16: 64px;
 
-  /* ---------- 圆角：卡片 12 / 控件 8 ---------- */
+  /* ---------- 圆角 ----------
+     三个层级各司其职，不再所有东西都用同一个值：
+     控件小而紧、容器稍大、图片只是轻微收角。 */
   --radius-xs: 4px;
   --radius-sm: 6px;
   --radius-md: 8px;
@@ -107,11 +128,11 @@
   --radius-xl: 16px;
   --radius-full: 999px;
 
-  /* ---------- 阴影：只用两级，避免层次混乱 ---------- */
-  --shadow-xs: 0 1px 2px rgba(16, 24, 40, 0.05);
-  --shadow-sm: 0 1px 3px rgba(16, 24, 40, 0.07), 0 1px 2px rgba(16, 24, 40, 0.04);
-  --shadow-md: 0 6px 16px rgba(16, 24, 40, 0.09), 0 2px 5px rgba(16, 24, 40, 0.05);
-  --shadow-lg: 0 16px 40px rgba(16, 24, 40, 0.14), 0 4px 12px rgba(16, 24, 40, 0.06);
+  /* ---------- 阴影：只保留两级，且都用在「浮起来」的东西上 ---------- */
+  --shadow-xs: 0 1px 2px rgba(20, 24, 31, 0.05);
+  --shadow-sm: 0 1px 3px rgba(20, 24, 31, 0.07), 0 1px 2px rgba(20, 24, 31, 0.04);
+  --shadow-md: 0 6px 16px rgba(20, 24, 31, 0.09), 0 2px 5px rgba(20, 24, 31, 0.05);
+  --shadow-lg: 0 16px 40px rgba(20, 24, 31, 0.14), 0 4px 12px rgba(20, 24, 31, 0.06);
   --shadow-focus: 0 0 0 3px var(--color-primary-200);
 
   /* ---------- 动效 ---------- */
@@ -132,9 +153,6 @@
   --z-dropdown: 200;
   --z-modal: 300;
   --z-toast: 400;
-
-  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB',
-    'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif;
 }
 
 @media (min-width: 768px) {
