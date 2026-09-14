@@ -22,7 +22,8 @@
   /* ---------- 强调色：价格专用，与品牌色区分 ---------- */
   --color-accent-50: #fff1ec;
   --color-accent-500: #f2542d;
-  --color-accent-600: #d93f19;
+  /* 600 用于价格文字：需要在白色背景上达到 4.5:1，比 500 再深一档 */
+  --color-accent-600: #cc3a15;
   --color-accent: var(--color-accent-500);
 
   /* ---------- 中性色阶：承担 90% 的界面 ---------- */
@@ -59,8 +60,13 @@
   --border-strong: var(--color-neutral-300);
   --text-primary: var(--color-neutral-900);
   --text-secondary: var(--color-neutral-600);
-  --text-tertiary: var(--color-neutral-500);
-  --text-placeholder: var(--color-neutral-400);
+  /*
+   * 这两个值决定「次要文字」是否达标。
+   * neutral-500 在页面底色 #f6f8fa 上只有约 4.3:1，不到 WCAG AA 要求的 4.5:1，
+   * 因此单独取一个更深的灰；placeholder 用 neutral-500 即可（输入框底色是纯白）。
+   */
+  --text-tertiary: #5f6a7a;
+  --text-placeholder: var(--color-neutral-500);
   --text-inverse: var(--color-neutral-0);
 
   /* ---------- 字号 ---------- */

@@ -99,7 +99,7 @@ import { APP_DESCRIPTION, APP_NAME, CATEGORY_SEED } from '@campus/shared'
 }
 
 .footer__note {
-  color: var(--color-neutral-400);
+  color: var(--text-tertiary);
 }
 
 @media (min-width: 768px) {

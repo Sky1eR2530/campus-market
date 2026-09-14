@@ -3,7 +3,9 @@ import type { Express } from 'express'
 import { env } from './config/env.js'
 import { storagePublicDir } from './lib/storage/index.js'
 import { errorHandler, notFoundHandler } from './middlewares/errorHandler.js'
+import { globalLimiter } from './middlewares/rateLimit.js'
 import { requestLogger } from './middlewares/requestLogger.js'
+import { securityHeaders } from './middlewares/securityHeaders.js'
 import { authRouter } from './modules/auth/auth.router.js'
 import { adminRouter } from './modules/admin/admin.router.js'
 import { categoryRouter } from './modules/categories/category.router.js'
@@ -21,8 +23,12 @@ export function createApp(): Express {
   // 生产环境部署在反向代理之后，需要信任代理头才能拿到真实 IP 与协议
   app.set('trust proxy', 1)
 
+  app.use(securityHeaders)
   app.use(express.json({ limit: '1mb' }))
   app.use(requestLogger)
+
+  // 全局限流兜底；更严格的限制挂在具体路由上
+  app.use('/api', globalLimiter)
 
   // 上传的图片。文件名是随机 UUID，内容不会变，因此可以长期缓存
   app.use(

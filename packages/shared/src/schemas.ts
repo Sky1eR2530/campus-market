@@ -175,6 +175,23 @@ export const itemQuerySchema = z.object({
 
 export type ItemQueryValues = z.infer<typeof itemQuerySchema>
 
+/**
+ * 通用分页参数。
+ * query string 里全是字符串，统一在这里转换与约束边界，
+ * 避免不同接口对 page / pageSize 的容忍度不一致。
+ */
+export const paginationQuerySchema = z.object({
+  page: z.coerce.number().int().min(1, '页码最小为 1').default(1),
+  pageSize: z.coerce
+    .number()
+    .int()
+    .min(1, '每页至少 1 条')
+    .max(60, '每页最多 60 条')
+    .default(12)
+})
+
+export type PaginationQueryValues = z.infer<typeof paginationQuerySchema>
+
 // ---------------------------------------------------------------------------
 // 用户资料
 // ---------------------------------------------------------------------------
@@ -230,3 +247,23 @@ export const updateCategorySchema = createCategorySchema.partial()
 
 export type CreateCategoryValues = z.infer<typeof createCategorySchema>
 export type UpdateCategoryValues = z.infer<typeof updateCategorySchema>
+
+export const adminUserQuerySchema = paginationQuerySchema.extend({
+  q: z.string().trim().max(60, '关键词过长').optional(),
+  status: z.enum(['active', 'banned']).optional(),
+  role: z.enum(['user', 'admin']).optional()
+})
+
+export const adminItemQuerySchema = paginationQuerySchema.extend({
+  q: z.string().trim().max(60, '关键词过长').optional(),
+  status: itemStatusRule.optional(),
+  category: z.string().trim().max(40).optional(),
+  // 注意不能用 z.coerce.boolean()：Boolean('false') 是 true，会把「不包含已删除」解析成包含
+  includeDeleted: z
+    .union([z.literal('true'), z.literal('false')])
+    .optional()
+    .transform((value) => value === 'true')
+})
+
+export type AdminUserQueryValues = z.infer<typeof adminUserQuerySchema>
+export type AdminItemQueryValues = z.infer<typeof adminItemQuerySchema>

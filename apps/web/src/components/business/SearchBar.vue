@@ -7,8 +7,10 @@ const props = withDefaults(
     modelValue: string
     placeholder?: string
     size?: 'md' | 'lg'
+    /** 同一页面可能存在多个搜索框时，用不同的无障碍名称区分 */
+    label?: string
   }>(),
-  { placeholder: '搜索你想要的闲置', size: 'md' }
+  { placeholder: '搜索你想要的闲置', size: 'md', label: '搜索商品' }
 )
 
 const emit = defineEmits<{
@@ -30,7 +32,13 @@ defineExpose({ focus: () => inputRef.value?.focus() })
 </script>
 
 <template>
-  <form class="search" :class="`search--${size}`" role="search" @submit.prevent="onSubmit">
+  <form
+    class="search"
+    :class="`search--${size}`"
+    role="search"
+    :aria-label="label"
+    @submit.prevent="onSubmit"
+  >
     <AppIcon class="search__icon" name="search" :size="size === 'lg' ? 20 : 18" />
     <input
       ref="inputRef"

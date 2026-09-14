@@ -163,6 +163,7 @@ function setCover(index: number): void {
         ref="inputRef"
         class="sr-only"
         type="file"
+        aria-label="选择商品图片"
         accept="image/jpeg,image/png,image/webp"
         multiple
         tabindex="-1"

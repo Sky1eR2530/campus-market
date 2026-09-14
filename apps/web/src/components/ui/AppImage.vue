@@ -66,7 +66,7 @@ watch(
   align-items: center;
   justify-content: center;
   gap: var(--space-1);
-  color: var(--color-neutral-400);
+  color: var(--text-tertiary);
 }
 
 .app-image__fallback-text {

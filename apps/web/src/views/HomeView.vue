@@ -93,6 +93,7 @@ function goQuick(entry: QuickEntry): void {
           <SearchBar
             v-model="keyword"
             size="lg"
+            label="首页搜索"
             placeholder="搜索书名、数码、生活用品…"
             @submit="onSearch"
           />

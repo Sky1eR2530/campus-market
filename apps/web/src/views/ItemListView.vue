@@ -201,6 +201,7 @@ function clearFilters(): void {
     <ItemGrid
       class="list__grid"
       :items="items"
+      :heading-level="2"
       :loading="list.loading.value"
       :error="list.error.value"
       :empty-title="emptyTitle"

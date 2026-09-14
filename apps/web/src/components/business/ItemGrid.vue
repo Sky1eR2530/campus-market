@@ -13,13 +13,16 @@ withDefaults(
     /** 空状态文案，不同页面语境不同 */
     emptyTitle?: string
     emptyDescription?: string
+    /** 透传给卡片的标题级别，保证页面标题层级不跳级 */
+    headingLevel?: 2 | 3
   }>(),
   {
     loading: false,
     error: null,
     skeletonCount: 8,
     emptyTitle: '这里还没有闲置',
-    emptyDescription: '换个筛选条件试试，或者成为第一个发布的人。'
+    emptyDescription: '换个筛选条件试试，或者成为第一个发布的人。',
+    headingLevel: 3
   }
 )
 
@@ -43,7 +46,12 @@ const emit = defineEmits<{ retry: [] }>()
   </AppEmpty>
 
   <div v-else class="item-grid">
-    <ItemCard v-for="item in items" :key="item.id" :item="item" />
+    <ItemCard
+      v-for="item in items"
+      :key="item.id"
+      :item="item"
+      :heading-level="headingLevel"
+    />
   </div>
 </template>
 

@@ -10,7 +10,8 @@ usePageMeta('页面不存在')
 
 <template>
   <div class="container page not-found">
-    <p class="not-found__code">404</p>
+    <!-- 纯装饰：下方的标题已经说明了页面不存在，这里对读屏软件隐藏 -->
+    <p class="not-found__code" aria-hidden="true">404</p>
     <h1 class="not-found__title">这个页面不存在</h1>
     <p class="not-found__desc">
       链接可能已经失效，或者商品已被卖家删除。你可以回到首页，或去闲置列表看看。
@@ -42,7 +43,8 @@ usePageMeta('页面不存在')
 .not-found__code {
   font-size: 4rem;
   font-weight: var(--weight-bold);
-  color: var(--color-primary-200);
+  /* 大号装饰文字同样需要 3:1 的对比度，浅色水印达不到 */
+  color: var(--color-primary-500);
   letter-spacing: -0.04em;
   line-height: 1;
 }

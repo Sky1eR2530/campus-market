@@ -80,7 +80,7 @@ watch(
       </nav>
 
       <div class="header__search">
-        <SearchBar v-model="keyword" @submit="submitSearch" />
+        <SearchBar v-model="keyword" label="站内搜索" @submit="submitSearch" />
       </div>
 
       <div class="header__actions">

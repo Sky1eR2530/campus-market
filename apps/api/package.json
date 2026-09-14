@@ -13,13 +13,15 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "verify:api": "tsx src/dev/verify-api.ts",
+    "bench": "tsx src/dev/bench.ts",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
     "db:reset": "prisma migrate reset --force",
     "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio",
-    "local-db": "tsx src/dev/local-db.ts"
+    "local-db": "tsx src/dev/local-db.ts",
+    "db:cleanup-demo": "tsx src/dev/cleanup-demo.ts"
   },
   "dependencies": {
     "@campus/shared": "workspace:*",
@@ -27,6 +29,8 @@
     "@prisma/client": "^7.10.0",
     "bcryptjs": "^3.0.3",
     "express": "^5.2.1",
+    "express-rate-limit": "^8.7.0",
+    "helmet": "^8.3.0",
     "jose": "^6.2.12",
     "multer": "^2.3.0",
     "pg": "^8.23.0",

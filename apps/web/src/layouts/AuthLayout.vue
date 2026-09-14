@@ -13,7 +13,7 @@ const HIGHLIGHTS: { icon: IconName; title: string; desc: string }[] = [
 
 <template>
   <div class="auth">
-    <section class="auth__brand">
+    <aside class="auth__brand">
       <div class="auth__brand-inner">
         <AppLogo />
         <h1 class="auth__headline">{{ APP_TAGLINE }}</h1>
@@ -29,9 +29,9 @@ const HIGHLIGHTS: { icon: IconName; title: string; desc: string }[] = [
           </li>
         </ul>
       </div>
-    </section>
+    </aside>
 
-    <section class="auth__main">
+    <main class="auth__main">
       <div class="auth__card">
         <slot />
       </div>
@@ -39,7 +39,7 @@ const HIGHLIGHTS: { icon: IconName; title: string; desc: string }[] = [
         <AppIcon name="chevronLeft" :size="15" />
         <span>返回首页</span>
       </RouterLink>
-    </section>
+    </main>
   </div>
 </template>
 

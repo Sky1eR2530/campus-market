@@ -7,7 +7,18 @@ import ItemStatusTag from './ItemStatusTag.vue'
 import PriceText from './PriceText.vue'
 import { formatRelativeTime } from '@campus/shared'
 
-const props = defineProps<{ item: Item }>()
+const props = withDefaults(
+  defineProps<{
+    item: Item
+    /**
+     * 卡片标题的标题级别。
+     * 首页的卡片在 h2 区块之下用 h3；列表页的页面标题是 h1，
+     * 卡片需要是 h2，否则会跳过一级。
+     */
+    headingLevel?: 2 | 3
+  }>(),
+  { headingLevel: 3 }
+)
 
 const cover = computed(() => props.item.images[0]?.url ?? '')
 const isInactive = computed(() => props.item.status !== 'on_sale')
@@ -28,7 +39,9 @@ const isInactive = computed(() => props.item.status !== 'on_sale')
       </div>
 
       <div class="item-card__body">
-        <h3 class="item-card__title clamp-2">{{ item.title }}</h3>
+        <component :is="`h${headingLevel}`" class="item-card__title clamp-2">
+          {{ item.title }}
+        </component>
 
         <PriceText :cents="item.priceCents" size="md" :muted="isInactive" />
 
@@ -67,7 +80,12 @@ const isInactive = computed(() => props.item.status !== 'on_sale')
   color: var(--text-tertiary);
 }
 
-.item-card--inactive .item-card__media {
+/*
+ * 只对图片本身降透明度。
+ * 之前是给整个媒体区加 opacity，结果叠在上面的状态标签也跟着变淡，
+ * 对比度掉到 3.31:1（低于 AA 要求的 4.5:1）。
+ */
+.item-card--inactive .item-card__media :deep(.app-image) {
   opacity: 0.72;
 }
 

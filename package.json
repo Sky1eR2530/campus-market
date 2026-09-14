@@ -20,11 +20,17 @@
     "typecheck": "pnpm -r typecheck",
     "smoke:web": "node work/smoke.mjs",
     "smoke:admin": "node work/smoke-admin.mjs",
+    "bench": "pnpm --filter @campus/api bench",
+    "a11y": "node work/a11y-audit.mjs",
     "db:local": "pnpm --filter @campus/api local-db",
     "db:generate": "pnpm --filter @campus/api db:generate",
     "db:migrate": "pnpm --filter @campus/api db:migrate",
     "db:seed": "pnpm --filter @campus/api db:seed",
     "db:reset": "pnpm --filter @campus/api db:reset",
+    "db:cleanup-demo": "pnpm --filter @campus/api db:cleanup-demo",
     "db:studio": "pnpm --filter @campus/api db:studio"
+  },
+  "devDependencies": {
+    "axe-core": "^4.13.0"
   }
 }

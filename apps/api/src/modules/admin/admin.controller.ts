@@ -1,12 +1,14 @@
 import {
   AppError,
   adminDeleteSchema,
+  adminItemQuerySchema,
   adminUpdateItemStatusSchema,
   adminUpdateUserStatusSchema,
+  adminUserQuerySchema,
   createCategorySchema,
   updateCategorySchema
 } from '@campus/shared'
-import type { AdminItemQuery, AdminUserQuery } from '@campus/shared'
+import { paginationQuerySchema } from '@campus/shared'
 import type { Request, Response } from 'express'
 import { requireUser } from '../../middlewares/authenticate.js'
 import { sendData, sendPage } from '../../utils/http.js'
@@ -26,14 +28,7 @@ export async function statsHandler(_req: Request, res: Response): Promise<void> 
 // ---------------------------------------------------------------------------
 
 export async function listUsersHandler(req: Request, res: Response): Promise<void> {
-  const query: AdminUserQuery = {
-    q: typeof req.query.q === 'string' ? req.query.q : undefined,
-    status: req.query.status === 'active' || req.query.status === 'banned' ? req.query.status : undefined,
-    role: req.query.role === 'user' || req.query.role === 'admin' ? req.query.role : undefined,
-    page: Number(req.query.page) || 1,
-    pageSize: Number(req.query.pageSize) || 20
-  }
-
+  const query = parseInput(adminUserQuerySchema, req.query)
   const { data, meta } = await adminService.listUsers(query)
   sendPage(res, data, meta)
 }
@@ -51,18 +46,7 @@ export async function updateUserStatusHandler(req: Request, res: Response): Prom
 // ---------------------------------------------------------------------------
 
 export async function listItemsHandler(req: Request, res: Response): Promise<void> {
-  const query: AdminItemQuery = {
-    q: typeof req.query.q === 'string' ? req.query.q : undefined,
-    status:
-      req.query.status === 'on_sale' || req.query.status === 'sold' || req.query.status === 'off_shelf'
-        ? req.query.status
-        : undefined,
-    category: typeof req.query.category === 'string' ? req.query.category : undefined,
-    includeDeleted: req.query.includeDeleted === 'true',
-    page: Number(req.query.page) || 1,
-    pageSize: Number(req.query.pageSize) || 20
-  }
-
+  const query = parseInput(adminItemQuerySchema, req.query)
   const { data, meta } = await adminService.listItems(query)
   sendPage(res, data, meta)
 }
@@ -121,9 +105,7 @@ export async function deleteCategoryHandler(req: Request, res: Response): Promis
 // ---------------------------------------------------------------------------
 
 export async function listActionsHandler(req: Request, res: Response): Promise<void> {
-  const page = Number(req.query.page) || 1
-  const pageSize = Number(req.query.pageSize) || 20
-
+  const { page, pageSize } = parseInput(paginationQuerySchema, req.query)
   const { data, meta } = await adminService.listActions(page, pageSize)
   sendPage(res, data, meta)
 }

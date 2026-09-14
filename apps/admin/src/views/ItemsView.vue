@@ -168,7 +168,8 @@ function actionText(kind: PendingAction['kind']): string {
                 <td>
                   <div class="item-cell">
                     <span class="admin-thumb">
-                      <img v-if="item.coverUrl" :src="item.coverUrl" :alt="item.title" loading="lazy" />
+                      <!-- 标题就在旁边，缩略图按装饰处理，避免读屏重复念一遍 -->
+                      <img v-if="item.coverUrl" :src="item.coverUrl" alt="" loading="lazy" />
                     </span>
                     <div class="admin-cell-title">
                       <p class="admin-cell-title__main">{{ item.title }}</p>

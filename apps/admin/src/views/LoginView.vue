@@ -56,7 +56,7 @@ async function onSubmit(): Promise<void> {
 </script>
 
 <template>
-  <div class="login">
+  <main class="login">
     <div class="login__card">
       <div class="login__brand">
         <span class="login__mark"><AppIcon name="shield" :size="22" /></span>
@@ -115,7 +115,7 @@ async function onSubmit(): Promise<void> {
         返回前台
       </RouterLink>
     </div>
-  </div>
+  </main>
 </template>
 
 <style scoped>

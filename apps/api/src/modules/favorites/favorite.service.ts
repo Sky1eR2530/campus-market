@@ -7,8 +7,13 @@ import { toItemDtos } from '../items/item.service.js'
 
 /**
  * 收藏数在 items 表里是冗余字段。
- * 这里用原生 SQL 增减而不是走 Prisma 的 update：
- * Prisma 的 update 会连带刷新 updated_at，让商品仅因为被收藏就看起来「刚更新过」。
+ *
+ * 两个实现细节：
+ * 1. 用原生 SQL 增减而不是走 Prisma 的 update——后者会连带刷新 updated_at，
+ *    让商品仅因为被收藏就看起来「刚更新过」。
+ * 2. 插入与计数放在同一条语句里（CTE + ON CONFLICT）。
+ *    先查再插的写法在并发下会两个请求都认为「还没收藏」，
+ *    其中一个撞唯一约束直接报错；单条语句既幂等又没有竞态。
  */
 
 export async function addFavorite(itemId: string, user: CurrentUser): Promise<void> {
@@ -21,31 +26,31 @@ export async function addFavorite(itemId: string, user: CurrentUser): Promise<vo
     throw new AppError('VALIDATION_FAILED', '不能收藏自己发布的商品', 422)
   }
 
-  await prisma.$transaction(async (tx) => {
-    const existing = await tx.favorite.findUnique({
-      where: { userId_itemId: { userId: user.id, itemId } },
-      select: { id: true }
-    })
-    // 幂等：重复收藏不报错，也不会把计数加两次
-    if (existing) return
-
-    await tx.favorite.create({ data: { userId: user.id, itemId } })
-    await tx.$executeRaw`UPDATE items SET favorite_count = favorite_count + 1 WHERE id = ${itemId}::uuid`
-  })
+  await prisma.$executeRaw`
+    WITH inserted AS (
+      INSERT INTO favorites (id, user_id, item_id, created_at)
+      VALUES (gen_random_uuid(), ${user.id}::uuid, ${itemId}::uuid, now())
+      ON CONFLICT (user_id, item_id) DO NOTHING
+      RETURNING 1
+    )
+    UPDATE items
+    SET favorite_count = favorite_count + 1
+    WHERE id = ${itemId}::uuid AND EXISTS (SELECT 1 FROM inserted)
+  `
 }
 
 export async function removeFavorite(itemId: string, user: CurrentUser): Promise<void> {
-  await prisma.$transaction(async (tx) => {
-    const existing = await tx.favorite.findUnique({
-      where: { userId_itemId: { userId: user.id, itemId } },
-      select: { id: true }
-    })
-    // 幂等：没收藏过也返回成功，计数不会被减成负数
-    if (!existing) return
-
-    await tx.favorite.delete({ where: { id: existing.id } })
-    await tx.$executeRaw`UPDATE items SET favorite_count = GREATEST(favorite_count - 1, 0) WHERE id = ${itemId}::uuid`
-  })
+  // 幂等：没收藏过也返回成功；GREATEST 保证计数不会被减成负数
+  await prisma.$executeRaw`
+    WITH deleted AS (
+      DELETE FROM favorites
+      WHERE user_id = ${user.id}::uuid AND item_id = ${itemId}::uuid
+      RETURNING 1
+    )
+    UPDATE items
+    SET favorite_count = GREATEST(favorite_count - 1, 0)
+    WHERE id = ${itemId}::uuid AND EXISTS (SELECT 1 FROM deleted)
+  `
 }
 
 export async function listFavoriteIds(user: CurrentUser): Promise<string[]> {

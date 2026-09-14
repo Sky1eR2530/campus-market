@@ -51,7 +51,7 @@ withDefaults(
   height: 64px;
   border-radius: var(--radius-full);
   background: var(--color-neutral-100);
-  color: var(--color-neutral-400);
+  color: var(--text-tertiary);
 }
 
 .empty--compact .empty__icon {

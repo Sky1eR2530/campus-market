@@ -72,7 +72,7 @@ async function remove(item: Item): Promise<void> {
     </AppEmpty>
 
     <template v-else>
-      <ItemGrid :items="items" />
+      <ItemGrid :items="items" :heading-level="2" />
 
       <ul class="remove-row">
         <li v-for="item in items" :key="item.id" class="remove-row__item">
