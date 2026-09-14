@@ -9,67 +9,70 @@ const icon = computed(() => CATEGORY_ICON_NAMES[props.category.icon] ?? 'box')
 </script>
 
 <template>
-  <!--
-    分类是导航，不是内容。
-    给六个导航项各套一个带边框和箭头的卡片会让首页看起来全是框，
-    这里改用图标宫格：一眼扫完，也不需要箭头提示「可点击」。
-  -->
   <RouterLink
-    class="category-tile"
+    class="category-card"
     :to="{ name: 'items', query: { category: category.slug } }"
     :aria-label="`查看${category.name}分类`"
   >
-    <span class="category-tile__icon"><AppIcon :name="icon" :size="24" /></span>
-    <span class="category-tile__name">{{ category.name }}</span>
-    <span v-if="showCount !== false" class="category-tile__count">
-      {{ category.itemCount }} 件
+    <span class="category-card__icon"><AppIcon :name="icon" :size="22" /></span>
+    <span class="category-card__body">
+      <span class="category-card__name">{{ category.name }}</span>
+      <span v-if="showCount !== false" class="category-card__count">{{ category.itemCount }} 件在售</span>
     </span>
+    <AppIcon class="category-card__arrow" name="chevronRight" :size="16" />
   </RouterLink>
 </template>
 
 <style scoped>
-.category-tile {
+.category-card {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: var(--space-1);
-  padding: var(--space-2) var(--space-1);
-  border-radius: var(--radius-md);
-  transition: background-color var(--transition-fast);
+  gap: var(--space-3);
+  padding: var(--space-3);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-base),
+    transform var(--transition-base);
 }
 
-.category-tile:hover {
-  background: var(--color-primary-50);
+.category-card:hover {
+  border-color: var(--color-primary-200);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
 }
 
-.category-tile__icon {
+.category-card__icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 52px;
-  height: 52px;
-  margin-bottom: var(--space-1);
-  border-radius: var(--radius-lg);
-  background: var(--bg-surface);
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  background: var(--color-primary-50);
   color: var(--color-primary-600);
-  border: 1px solid var(--border-default);
-  transition: border-color var(--transition-fast), color var(--transition-fast);
 }
 
-.category-tile:hover .category-tile__icon {
-  border-color: var(--color-primary-300);
-  color: var(--color-primary-700);
+.category-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
 }
 
-.category-tile__name {
+.category-card__name {
   font-size: var(--text-base);
   font-weight: var(--weight-medium);
-  color: var(--text-primary);
 }
 
-.category-tile__count {
+.category-card__count {
   font-size: var(--text-xs);
   color: var(--text-tertiary);
-  font-variant-numeric: tabular-nums;
+}
+
+.category-card__arrow {
+  margin-left: auto;
+  color: var(--color-neutral-300);
 }
 </style>

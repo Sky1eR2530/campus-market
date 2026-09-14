@@ -255,7 +255,7 @@ async function confirmDelete(): Promise<void> {
             </div>
             <div v-if="detail.school || detail.campus">
               <dt>交易校区</dt>
-              <dd>{{ [detail.school, detail.campus].filter(Boolean).join(' ') }}</dd>
+              <dd>{{ [detail.school, detail.campus].filter(Boolean).join(' · ') }}</dd>
             </div>
           </dl>
 
@@ -315,12 +315,7 @@ async function confirmDelete(): Promise<void> {
             </div>
           </div>
 
-          <!--
-            描述是同一列里的正文，不需要再套一层容器。
-            整页每个区块都是同一个圆角盒子，正是模板感最重的地方；
-            这里只给「卖家信息」这类独立实体保留容器。
-          -->
-          <section class="info__desc">
+          <section class="card card--pad info__desc">
             <h2 class="info__section-title">商品描述</h2>
             <p class="info__desc-text">{{ detail.description }}</p>
           </section>
@@ -603,11 +598,6 @@ async function confirmDelete(): Promise<void> {
 .info__section-title {
   margin-bottom: var(--space-3);
   font-size: var(--text-md);
-}
-
-.info__desc {
-  padding-top: var(--space-4);
-  border-top: 1px solid var(--border-default);
 }
 
 .info__desc-text {

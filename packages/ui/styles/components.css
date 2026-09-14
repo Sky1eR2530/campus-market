@@ -163,18 +163,15 @@
   padding: var(--space-4);
 }
 
-/*
- * 可交互的容器只做「边界变清晰」这一件事。
- * 之前每张卡片悬浮时都上移 2px 并加深阴影——那是模板站点的通病：
- * 满屏的东西一起动，反而没有重点。
- */
 .card--interactive {
-  transition: border-color var(--transition-fast), background-color var(--transition-fast);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-base),
+    transform var(--transition-base);
 }
 
 .card--interactive:hover {
   border-color: var(--color-primary-200);
-  background: var(--color-primary-50);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
 }
 
 /* ---------- 头像 ---------- */

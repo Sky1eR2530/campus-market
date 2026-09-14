@@ -52,7 +52,7 @@ const activeName = computed(() => String(route.name ?? ''))
           <p class="uc__email truncate">{{ auth.user?.email }}</p>
           <p v-if="auth.user?.school || auth.user?.campus" class="uc__place">
             <AppIcon name="location" :size="13" />
-            {{ [auth.user?.school, auth.user?.campus].filter(Boolean).join(' ') }}
+            {{ [auth.user?.school, auth.user?.campus].filter(Boolean).join(' · ') }}
           </p>
         </div>
 

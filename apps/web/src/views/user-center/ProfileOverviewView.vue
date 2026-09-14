@@ -102,7 +102,7 @@ function goToItems(status: string | null): void {
           <dt>学校 / 校区</dt>
           <dd>
             {{
-              [auth.user?.school, auth.user?.campus].filter(Boolean).join(' ') || '未填写'
+              [auth.user?.school, auth.user?.campus].filter(Boolean).join(' · ') || '未填写'
             }}
           </dd>
         </div>

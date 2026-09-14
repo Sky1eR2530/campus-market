@@ -292,8 +292,7 @@ function actionText(kind: PendingAction['kind']): string {
 }
 
 .price {
-  /* 表格里的数字列用等宽数字，纵向扫视时位数才对得齐 */
-  font-variant-numeric: lining-nums tabular-nums;
+  font-variant-numeric: tabular-nums;
   font-weight: var(--weight-medium);
   color: var(--color-accent-600);
 }
