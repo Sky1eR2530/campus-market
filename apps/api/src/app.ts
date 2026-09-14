@@ -1,6 +1,7 @@
 import express from 'express'
 import type { Express } from 'express'
 import { env } from './config/env.js'
+import { mountStaticApps } from './lib/static-hosting.js'
 import { storagePublicDir } from './lib/storage/index.js'
 import { errorHandler, notFoundHandler } from './middlewares/errorHandler.js'
 import { globalLimiter } from './middlewares/rateLimit.js'
@@ -30,11 +31,15 @@ export function createApp(): Express {
   // 全局限流兜底；更严格的限制挂在具体路由上
   app.use('/api', globalLimiter)
 
-  // 上传的图片。文件名是随机 UUID，内容不会变，因此可以长期缓存
-  app.use(
-    env.STORAGE_PUBLIC_PATH,
-    express.static(storagePublicDir, { immutable: true, maxAge: '30d', index: false })
-  )
+  // 上传的图片。只有本地磁盘驱动才需要本服务托管；
+  // 生产环境走对象存储，图片由 CDN / 存储服务直接提供
+  if (env.STORAGE_DRIVER === 'local') {
+    // 文件名是随机 UUID，内容不会变，因此可以长期缓存
+    app.use(
+      env.STORAGE_PUBLIC_PATH,
+      express.static(storagePublicDir, { immutable: true, maxAge: '30d', index: false })
+    )
+  }
 
   app.use('/api/health', healthRouter)
   app.use('/api/admin', adminRouter)
@@ -44,6 +49,9 @@ export function createApp(): Express {
   app.use('/api/favorites', favoriteRouter)
   app.use('/api/users', userRouter)
   app.use('/api/uploads', uploadRouter)
+
+  // 生产环境由同一个服务托管学生端与管理端；开发环境由 Vite 负责
+  mountStaticApps(app)
 
   // 顺序要求：404 兜底在前，错误处理必须放在最后
   app.use(notFoundHandler)

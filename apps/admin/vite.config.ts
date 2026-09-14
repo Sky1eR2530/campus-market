@@ -2,14 +2,20 @@ import { fileURLToPath, URL } from 'node:url'
 import vue from '@vitejs/plugin-vue'
 import { defineConfig, loadEnv } from 'vite'
 
-export default defineConfig(({ mode }) => {
+export default defineConfig(({ mode, command }) => {
   const env = loadEnv(mode, process.cwd(), '')
   const apiTarget = env.VITE_DEV_API_TARGET || 'http://localhost:3000'
 
+  /*
+   * 生产环境管理端由后端挂在 /admin 下，构建产物里的资源引用与前端路由
+   * 都必须带上这个前缀；开发环境仍从根路径访问，方便本地调试。
+   * 可以用 VITE_PUBLIC_BASE 覆盖（比如挂到别的子路径）。
+   */
+  const defaultBase = command === 'build' && mode === 'production' ? '/admin/' : '/'
+
   return {
     plugins: [vue()],
-    // 生产环境部署在 /admin 子路径下（由后端同源托管），开发环境用根路径
-    base: env.VITE_PUBLIC_BASE || '/',
+    base: env.VITE_PUBLIC_BASE || defaultBase,
     resolve: {
       alias: {
         '@': fileURLToPath(new URL('./src', import.meta.url)),

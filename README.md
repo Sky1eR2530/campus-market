@@ -333,19 +333,102 @@ node work/smoke-admin.mjs
 当前提供本地磁盘驱动（`STORAGE_DRIVER=local`），文件落在 `apps/api/uploads/`，
 通过 `/uploads/*` 以静态资源方式提供。
 
-要接入对象存储（Cloudflare R2 / S3 / OSS），只需实现同一个接口的三个方法
-（`save` / `remove` / `resolveKey`）并在 `src/lib/storage/index.ts` 的工厂里注册。
-业务代码不需要任何改动。
+已经提供两个驱动，通过 `STORAGE_DRIVER` 切换：
 
-> `STORAGE_DRIVER=s3` 目前会**直接报错退出**而不是静默回退到本地磁盘：
-> 生产环境误把文件写到容器本地磁盘，重启后图片会全部丢失，这种问题越早暴露越好。
-> 对象存储驱动计划在部署阶段实现。
+| 值 | 存储位置 | 适用场景 |
+| --- | --- | --- |
+| `local` | `apps/api/uploads/`，由本服务经 `/uploads/*` 提供 | 本地开发 |
+| `s3` | S3 兼容对象存储（Supabase Storage / Cloudflare R2 / OSS） | 生产环境 |
+
+两个驱动实现同一个 `StorageAdapter` 接口（`save` / `remove` / `resolveKey`），
+业务代码只依赖接口，切换存储不需要改动商品与上传模块。
+
+> `STORAGE_DRIVER=s3` 时，缺少任意一项 S3 配置都会**在启动阶段直接失败并列出缺哪几项**，
+> 而不是等到用户上传第一张图才报错。
 
 商品提交的图片地址会被校验必须来自本平台存储，避免把服务当成任意外链的图床。
 
+## 部署
+
+生产环境采用**同源单服务**：同一个 Node 服务同时提供学生端、管理端与 API。
+这样没有跨域预检、没有 Cookie 的 `SameSite` 限制，开发与生产行为一致，
+对外也只有一个访问地址。
+
+```
+                    ┌──────────────────────────────────────────┐
+   浏览器  ───────▶ │  Node 服务（Render）                      │
+                    │  /api/*     → Express API                 │
+                    │  /admin/*   → 管理端产物 + SPA fallback    │
+                    │  /*         → 学生端产物 + SPA fallback    │
+                    └──────────┬───────────────────┬───────────┘
+                               │                   │
+                    ┌──────────┴────────┐  ┌───────┴──────────┐
+                    │ Neon PostgreSQL   │  │ 对象存储          │
+                    └───────────────────┘  └──────────────────┘
+```
+
+### 平台与成本
+
+| 用途 | 服务 | 免费额度（参考，以官网为准） | 费用 |
+| --- | --- | --- | --- |
+| 后端托管 | Render Web Service | 512MB / 750 实例小时每月 | ¥0 |
+| 数据库 | Neon PostgreSQL | 0.5GB / 190 计算小时每月 | ¥0 |
+| 图片存储 | Supabase Storage | 1GB / 5GB 出站 | ¥0 |
+| 保活监控（可选） | UptimeRobot | 50 个监控项 | ¥0 |
+
+选这三家的共同理由是**都不需要绑定信用卡**。
+（Cloudflare R2 额度更大且出站免费，但开通要求绑定支付方式。）
+
+⚠️ Render 免费实例闲置 15 分钟后休眠，下次访问需要 30–60 秒唤醒。
+用 UptimeRobot 每 5 分钟访问一次 `/api/health` 可以保持常驻：
+24 小时约消耗 730 实例小时，正好在 750 的免费额度内。
+
+### 部署步骤
+
+```bash
+# 1. 本地构建并验证
+pnpm install --frozen-lockfile
+pnpm build
+pnpm typecheck
+
+# 2. 生产环境执行数据库迁移与种子数据（DATABASE_URL 指向托管数据库）
+pnpm db:deploy
+pnpm db:seed
+
+# 3. 平台侧配置
+#    Build Command:  pnpm install --frozen-lockfile && pnpm build
+#    Start Command:  pnpm start
+#    Health Check:   /api/health
+```
+
+生产构建会自动把管理端打到 `/admin/` 子路径（见 `apps/admin/vite.config.ts`），
+后端在 `NODE_ENV=production` 时接手托管两个前端产物。
+
+### 生产环境变量
+
+| 变量 | 说明 |
+| --- | --- |
+| `NODE_ENV` | 固定 `production` |
+| `DATABASE_URL` | Neon 的连接串 |
+| `JWT_SECRET` | 至少 32 字符的随机串 |
+| `STORAGE_DRIVER` | 固定 `s3` |
+| `S3_ENDPOINT` / `S3_BUCKET` / `S3_ACCESS_KEY_ID` / `S3_SECRET_ACCESS_KEY` | 对象存储凭据 |
+| `S3_PUBLIC_BASE_URL` | 图片公开访问前缀 |
+| `WEB_DIST_DIR` / `ADMIN_DIST_DIR` | 前端产物目录，默认即为构建输出路径 |
+
+缺少必需项时服务会**启动失败并列出缺哪几项**，而不是带着半截配置跑起来。
+完整清单见 `apps/api/.env.example`。
+
+### 部署后验证
+
+```bash
+VERIFY_BASE_URL=https://你的域名/api pnpm verify:api
+```
+
+会走一遍注册、登录、上传图片、发布商品、搜索、收藏、改状态、删除的完整链路。
+
 ## 已知限制（当前阶段）
 
-- 图片对象存储驱动未实现，目前只有本地磁盘驱动。
 - 商品图片的宽高字段尚未写入（前端用固定宽高比占位，暂不需要）。
 - **中文搜索的索引效果与关键词长度有关**：pg_trgm 三元组索引在关键词达到 3 个字符时才比较高效，
   「键盘」这类 2 字词会退化成顺序扫描。校园规模（数千件商品）下实测约 1.6ms，可以接受；

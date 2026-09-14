@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "packageManager": "pnpm@11.19.0",
   "description": "校园闲置与生活信息服务平台",
   "engines": {
     "node": ">=20.19"
@@ -16,6 +17,7 @@
     "build:web": "pnpm --filter @campus/web build",
     "build:admin": "pnpm --filter @campus/admin build",
     "build:api": "pnpm --filter @campus/shared build && pnpm --filter @campus/api build",
+    "start": "node apps/api/dist/index.js",
     "preview": "pnpm --filter @campus/web preview",
     "typecheck": "pnpm -r typecheck",
     "smoke:web": "node work/smoke.mjs",
