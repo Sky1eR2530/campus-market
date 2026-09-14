@@ -358,6 +358,11 @@ async function confirmDelete(): Promise<void> {
   outline: none;
 }
 
+.inline-input:focus {
+  border-color: var(--color-primary-500);
+  box-shadow: var(--shadow-focus);
+}
+
 .inline-input--tiny {
   width: 64px;
 }

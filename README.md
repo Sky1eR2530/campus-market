@@ -376,3 +376,17 @@ Phase 6 部署上线：把前端构建产物与 API 由同一个服务托管（�
 
 限流额度定得偏宽松是刻意的：校园网普遍是 NAT 共享出口 IP，
 按 IP 收得太紧会让一个同学跑脚本把整栋楼的人一起挡住。
+
+除自动化扫描外，还按 Web 界面规范逐条复核过一遍，修正了其中确实存在的问题：
+
+| 问题 | 处理 |
+| --- | --- |
+| 顶部栏是 sticky，键盘 Tab 时焦点会被盖住 | `html` 上设置 `scroll-padding-top` 预留高度 |
+| 后台行内输入框去掉了默认轮廓，却没有等价的焦点样式 | 补上焦点描边 |
+| 发布表单填了一半误点返回会全部丢失 | 增加离开确认（路由守卫 + `beforeunload`） |
+| 日期手工拼接，跨时区/跨语言行为不可控 | 改用 `Intl.DateTimeFormat`，formatter 缓存复用 |
+| 移动端双击有缩放延迟 | 交互元素设置 `touch-action: manipulation` |
+| 弹窗内滚动会带动背后页面 | `overscroll-behavior: contain` |
+| 邮箱/密码输入框触发拼写检查 | 关闭 `spellcheck` |
+| 品牌名可能被浏览器自动翻译 | `translate="no"` |
+| 标题末行容易只剩一个字 | `text-wrap: balance` |

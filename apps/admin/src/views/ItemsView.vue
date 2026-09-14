@@ -169,7 +169,14 @@ function actionText(kind: PendingAction['kind']): string {
                   <div class="item-cell">
                     <span class="admin-thumb">
                       <!-- 标题就在旁边，缩略图按装饰处理，避免读屏重复念一遍 -->
-                      <img v-if="item.coverUrl" :src="item.coverUrl" alt="" loading="lazy" />
+                      <img
+                        v-if="item.coverUrl"
+                        :src="item.coverUrl"
+                        alt=""
+                        width="48"
+                        height="48"
+                        loading="lazy"
+                      />
                     </span>
                     <div class="admin-cell-title">
                       <p class="admin-cell-title__main">{{ item.title }}</p>

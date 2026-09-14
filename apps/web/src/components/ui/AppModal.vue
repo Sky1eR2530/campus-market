@@ -158,6 +158,8 @@ onUnmounted(() => {
 .modal-body {
   padding: 0 var(--space-5) var(--space-5);
   overflow-y: auto;
+  /* 弹窗内滚动到底时不把滚动传递给背后的页面 */
+  overscroll-behavior: contain;
 }
 
 .modal-foot {

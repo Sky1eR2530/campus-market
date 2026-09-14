@@ -51,6 +51,14 @@ const describedBy = computed(() => {
   return undefined
 })
 
+/**
+ * 邮箱与密码不应该触发拼写检查：红色波浪线既干扰阅读，
+ * 也让密码管理器更容易误判字段用途。
+ */
+const spellcheck = computed(() =>
+  props.type === 'email' || props.type === 'password' ? 'false' : undefined
+)
+
 function onInput(event: Event): void {
   emit('update:modelValue', (event.target as HTMLInputElement).value)
 }
@@ -80,6 +88,7 @@ function onInput(event: Event): void {
         :required="required"
         :aria-invalid="Boolean(error) || undefined"
         :aria-describedby="describedBy"
+        :spellcheck="spellcheck"
         @input="onInput"
         @blur="emit('blur')"
         @keyup.enter="emit('enter')"

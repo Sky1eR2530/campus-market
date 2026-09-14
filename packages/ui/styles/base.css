@@ -11,6 +11,11 @@
 html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
+  /*
+   * 顶部栏是 sticky 的：浏览器把聚焦元素滚入视口时会正好被它盖住。
+   * 用 scroll-padding 预留出顶部栏的高度，键盘 Tab 时焦点不会被遮住。
+   */
+  scroll-padding-top: calc(var(--header-height) + var(--space-3));
 }
 
 body {
@@ -47,6 +52,18 @@ h3,
 h4 {
   font-weight: var(--weight-semibold);
   line-height: var(--leading-tight);
+  /* 避免标题最后一行只剩一个孤字 */
+  text-wrap: balance;
+}
+
+a,
+button,
+input,
+select,
+textarea,
+label {
+  /* 移动端双击不再触发缩放延迟，点击响应更跟手 */
+  touch-action: manipulation;
 }
 
 a {

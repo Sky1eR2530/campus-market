@@ -7,7 +7,8 @@ import {
   TITLE_MAX,
   itemFormSchema
 } from '@campus/shared'
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue'
+import { onBeforeRouteLeave } from 'vue-router'
 import { fetchCategories } from '@campus/api-client'
 import { AppButton, AppIcon, AppSkeleton, CATEGORY_ICON_NAMES, useAsync } from '@campus/ui'
 import AppImageUploader from '@/components/ui/AppImageUploader.vue'
@@ -51,6 +52,34 @@ const errors = reactive<Record<string, string>>({})
 const touched = reactive<Record<string, boolean>>({})
 const submitted = ref(false)
 
+/**
+ * 未保存改动的提醒。
+ * 发布表单要填六七个字段、还要传图，一次误点返回就全没了，
+ * 因此离开前确认一次；提交成功后不再打扰。
+ */
+function snapshot(): string {
+  return JSON.stringify({ ...form })
+}
+
+const baseline = ref(snapshot())
+const isDirty = computed(() => snapshot() !== baseline.value)
+
+function confirmLeave(): boolean {
+  if (!isDirty.value || submitted.value) return true
+  return window.confirm('离开后已填写的内容不会保存，确定要离开吗？')
+}
+
+// 关闭标签页 / 刷新时同样提醒（浏览器只允许显示默认文案）
+function onBeforeUnload(event: BeforeUnloadEvent): void {
+  if (!isDirty.value || submitted.value) return
+  event.preventDefault()
+}
+
+onMounted(() => window.addEventListener('beforeunload', onBeforeUnload))
+onUnmounted(() => window.removeEventListener('beforeunload', onBeforeUnload))
+
+onBeforeRouteLeave(() => confirmLeave())
+
 const categoryOptions = computed<Category[]>(() => {
   const list = categories.data.value ?? []
   // 分类还在加载时先用种子数据渲染，避免分类区域出现空洞
@@ -76,6 +105,8 @@ function fillFrom(item: Item | null | undefined): void {
   form.price = centsToYuanInput(item.priceCents)
   form.description = item.description
   form.images = item.images.map((image) => image.url)
+  // 载入完成后以当前内容作为「未修改」的基准
+  baseline.value = snapshot()
 }
 
 watch(() => props.initial, fillFrom, { immediate: true })

@@ -18,7 +18,8 @@ withDefaults(defineProps<{ compact?: boolean }>(), { compact: false })
       />
       <circle cx="11" cy="21" r="2.4" fill="none" stroke="#fff" stroke-width="2" />
     </svg>
-    <span v-if="!compact" class="logo__text">{{ APP_NAME }}</span>
+    <!-- 品牌名不应该被浏览器自动翻译 -->
+    <span v-if="!compact" class="logo__text" translate="no">{{ APP_NAME }}</span>
   </RouterLink>
 </template>
 

@@ -39,22 +39,39 @@ export function formatRelativeTime(iso: string): string {
   return formatDate(iso)
 }
 
-function pad(value: number): string {
-  return String(value).padStart(2, '0')
-}
+/**
+ * 用 Intl 而不是手工拼接日期：
+ * 跨时区、跨语言的行为一致，也不会因为忘记补零出现 2026-9-4 这种写法。
+ * formatter 缓存在模块作用域——构造 Intl 实例并不便宜，逐次新建会明显拖慢列表渲染。
+ */
+const dateFormatter = new Intl.DateTimeFormat('zh-CN', {
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit'
+})
 
-/** 2026-09-14 */
+const dateTimeFormatter = new Intl.DateTimeFormat('zh-CN', {
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+  hour: '2-digit',
+  minute: '2-digit',
+  // 用 h23 而不是 hour12:false：后者在部分地区会输出 24:00
+  hourCycle: 'h23'
+})
+
+/** 2026/09/14 */
 export function formatDate(iso: string): string {
   const d = new Date(iso)
   if (Number.isNaN(d.getTime())) return ''
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+  return dateFormatter.format(d)
 }
 
-/** 2026-09-14 14:30 */
+/** 2026/09/14 14:30 */
 export function formatDateTime(iso: string): string {
   const d = new Date(iso)
   if (Number.isNaN(d.getTime())) return ''
-  return `${formatDate(iso)} ${pad(d.getHours())}:${pad(d.getMinutes())}`
+  return dateTimeFormatter.format(d)
 }
 
 /** 大数字缩写：1234 → 1.2k，用于浏览/收藏计数 */
