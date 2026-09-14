@@ -36,7 +36,7 @@
   },
   "devDependencies": {
     "axe-core": "^4.13.0"
-  }
+  },
 "pnpm": {
   "allowedBuilds": [
     "@embedded-postgres/linux-x64",
@@ -45,4 +45,5 @@
   "onlyBuiltDependencies": [
     "@embedded-postgres/linux-x64"
   ]
+ }
 }
