@@ -30,14 +30,14 @@ export const loginSchema = z.object({
   password: z.string().min(1, '请输入密码').min(PASSWORD_MIN, `密码至少 ${PASSWORD_MIN} 位`)
 })
 
-const nickname = z
+export const nicknameRule = z
   .string()
   .trim()
   .min(1, '请输入昵称')
   .min(NICKNAME_MIN, `昵称至少 ${NICKNAME_MIN} 个字`)
   .max(NICKNAME_MAX, `昵称最多 ${NICKNAME_MAX} 个字`)
 
-const password = z
+export const passwordRule = z
   .string()
   .min(1, '请设置密码')
   .min(PASSWORD_MIN, `密码至少 ${PASSWORD_MIN} 位`)
@@ -48,7 +48,11 @@ const password = z
 /**
  * 注册接口的请求体。后端只需要这三个字段。
  */
-export const registerPayloadSchema = z.object({ email, nickname, password })
+export const registerPayloadSchema = z.object({
+  email,
+  nickname: nicknameRule,
+  password: passwordRule
+})
 export type RegisterPayloadValues = z.infer<typeof registerPayloadSchema>
 
 /**
@@ -105,3 +109,82 @@ export const profileSchema = z.object({
 })
 
 export type ProfileFormValues = z.infer<typeof profileSchema>
+
+// ---------------------------------------------------------------------------
+// 商品
+// ---------------------------------------------------------------------------
+
+export const itemTitleRule = z
+  .string()
+  .trim()
+  .min(1, '请输入商品名称')
+  .min(TITLE_MIN, `名称至少 ${TITLE_MIN} 个字`)
+  .max(TITLE_MAX, `名称最多 ${TITLE_MAX} 个字`)
+
+export const itemDescriptionRule = z
+  .string()
+  .trim()
+  .min(1, '请填写商品描述')
+  .min(DESCRIPTION_MIN, `描述至少 ${DESCRIPTION_MIN} 个字，说明成色和交易方式更容易卖出`)
+  .max(DESCRIPTION_MAX, `描述最多 ${DESCRIPTION_MAX} 个字`)
+
+export const itemStatusRule = z.enum(['on_sale', 'sold', 'off_shelf'])
+
+/**
+ * 发布商品的请求体。
+ * 价格用「分」的整数传递，避免在传输和计算过程中出现浮点误差。
+ */
+export const createItemPayloadSchema = z.object({
+  title: itemTitleRule,
+  description: itemDescriptionRule,
+  priceCents: z
+    .number({ error: '价格必须是以「分」为单位的整数' })
+    .int('价格必须是以「分」为单位的整数')
+    .positive('价格必须大于 0')
+    .max(PRICE_MAX_CENTS, '价格超出上限'),
+  categorySlug: z.string().trim().min(1, '请选择分类'),
+  images: z
+    .array(z.string().trim().min(1))
+    .min(1, '请至少上传一张商品图片')
+    .max(MAX_ITEM_IMAGES, `最多上传 ${MAX_ITEM_IMAGES} 张图片`)
+})
+
+export type CreateItemPayloadValues = z.infer<typeof createItemPayloadSchema>
+
+/** 编辑商品：所有字段可选，只改传上来的部分 */
+export const updateItemPayloadSchema = createItemPayloadSchema.partial()
+export type UpdateItemPayloadValues = z.infer<typeof updateItemPayloadSchema>
+
+export const updateItemStatusSchema = z.object({ status: itemStatusRule })
+
+/**
+ * 商品列表查询条件。
+ * query string 里全是字符串，因此用 coerce 转换数值，并在这里统一约束边界，
+ * 避免把「pageSize=10000」这类请求透传到数据库。
+ */
+export const itemQuerySchema = z.object({
+  q: z.string().trim().max(60, '关键词过长').optional(),
+  category: z.string().trim().max(40).optional(),
+  sort: z.enum(['latest', 'price_asc', 'price_desc']).optional(),
+  status: itemStatusRule.optional(),
+  sellerId: z.string().uuid('卖家 id 格式不正确').optional(),
+  page: z.coerce.number().int().min(1).default(1),
+  pageSize: z.coerce.number().int().min(1).max(60).default(12)
+})
+
+export type ItemQueryValues = z.infer<typeof itemQuerySchema>
+
+// ---------------------------------------------------------------------------
+// 用户资料
+// ---------------------------------------------------------------------------
+
+/** 编辑资料：只允许修改这些字段，且全部可选 */
+export const updateProfilePayloadSchema = z.object({
+  nickname: nicknameRule.optional(),
+  school: z.string().trim().max(50, '学校名称过长').nullish(),
+  campus: z.string().trim().max(50, '校区名称过长').nullish(),
+  contact: z.string().trim().max(100, '联系方式过长').nullish(),
+  bio: z.string().trim().max(BIO_MAX, `简介最多 ${BIO_MAX} 个字`).nullish()
+})
+
+export type UpdateProfilePayloadValues = z.infer<typeof updateProfilePayloadSchema>

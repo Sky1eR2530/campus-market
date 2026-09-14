@@ -10,13 +10,13 @@
 | --- | --- | --- |
 | Phase 0 | 项目规划（产品、数据模型、架构、阶段计划） | 已完成 |
 | Phase 1 | 前端 UI / MVP 页面（Mock 数据） | 已完成 |
-| Phase 2 | 后端 API 与数据库 | 进行中 |
+| Phase 2 | 后端 API 与数据库 | 已完成 |
 | 2.1 | 工程骨架、环境变量校验、Prisma 模型、迁移、种子数据、健康检查 | 已完成 |
 | 2.2 | 认证模块（注册 / 登录 / JWT / 鉴权中间件 / 接口测试） | 已完成 |
-| 2.3 | 分类与商品 CRUD、状态机 | 待开始 |
-| 2.4 | 图片上传（存储抽象层） | 待开始 |
-| 2.5 | 收藏与用户资料 | 待开始 |
-| 2.6 | 接口层测试 | 待开始 |
+| 2.3 | 分类与商品接口、状态机、中文搜索 | 已完成 |
+| 2.4 | 图片上传与存储抽象层 | 已完成 |
+| 2.5 | 收藏与用户资料 | 已完成 |
+| 2.6 | 接口层测试 | 已完成（88 个用例） |
 | Phase 3 | 前后端联调 | 待开始 |
 | Phase 4 | 管理后台 | 待开始 |
 | Phase 5 | 测试与优化 | 待开始 |
@@ -137,6 +137,7 @@ pnpm dev              # 前端：http://localhost:5173
 | `pnpm db:seed` | 写入种子数据 |
 | `pnpm db:reset` | 清空并重建数据库（会丢数据） |
 | `pnpm db:studio` | 打开 Prisma Studio 可视化查看数据 |
+| `pnpm verify:api` | 对运行中的 API 做完整链路冒烟（需先启动后端） |
 
 > 如果环境里没有全局 `pnpm`，可以用 `corepack enable` 启用，
 > 或直接调用任意可用的 pnpm 可执行文件，例如
@@ -163,6 +164,23 @@ pnpm dev              # 前端：http://localhost:5173
 | POST | `/api/auth/login` | 登录，返回 token |
 | GET | `/api/auth/me` | 获取当前登录用户（需要 `Authorization: Bearer <token>`） |
 | POST | `/api/auth/logout` | 登出，返回 204 |
+| GET | `/api/categories` | 分类列表，含各分类的在售数量 |
+| GET | `/api/items` | 商品列表，支持 `q`、`category`、`sort`、`status`、`sellerId`、`page`、`pageSize` |
+| GET | `/api/items/:id` | 商品详情，浏览量自增 |
+| POST | `/api/items` | 发布商品 |
+| PATCH | `/api/items/:id` | 编辑商品（仅发布者本人） |
+| PATCH | `/api/items/:id/status` | 修改商品状态：在售 / 已售 / 下架（仅本人） |
+| DELETE | `/api/items/:id` | 软删除商品（仅本人） |
+| POST | `/api/uploads/images` | 上传商品图片（multipart，字段名 `file`） |
+| POST | `/api/favorites/:itemId` | 收藏商品（幂等） |
+| DELETE | `/api/favorites/:itemId` | 取消收藏（幂等） |
+| GET | `/api/favorites` | 我的收藏列表 |
+| GET | `/api/favorites/ids` | 我的收藏 id 列表，供前端标记爱心状态 |
+| PATCH | `/api/users/me` | 编辑个人资料 |
+| GET | `/api/users/:id` | 卖家主页信息与商品统计 |
+
+标注「可选」的公开接口使用可选鉴权：未登录正常返回内容，已登录时额外返回
+「我是否收藏了它」以及卖家联系方式。
 
 成功响应统一为 `{ "data": ... }`，错误响应统一为
 `{ "error": { "code": "...", "message": "...", "details": [] } }`。
@@ -245,16 +263,38 @@ curl http://localhost:3000/api/health
   因此业务代码里不需要写 try/catch 包裹。
 - **价格一律以「分」为单位的整数存储**，避免浮点误差。
 - **迁移文件纳入版本控制**：数据库结构的每一次变更都有可回滚的记录。
+- **中文搜索用 `pg_trgm` + GIN 索引**：PostgreSQL 默认的全文检索分词器对中文基本无效，
+  因此改用三元组索引加速 `ILIKE '%关键词%'`（见 `migrations/*_add_trgm_search_index`）。
+- **计数器用原生 SQL 维护**：浏览量和收藏数的自增走 `$executeRaw`，
+  避免 Prisma 的 `update` 连带刷新 `updated_at`，让商品仅因为被浏览就看起来「刚更新过」。
+
+## 图片存储
+
+上传逻辑只依赖 `src/lib/storage/types.ts` 里的 `StorageAdapter` 接口，
+当前提供本地磁盘驱动（`STORAGE_DRIVER=local`），文件落在 `apps/api/uploads/`，
+通过 `/uploads/*` 以静态资源方式提供。
+
+要接入对象存储（Cloudflare R2 / S3 / OSS），只需实现同一个接口的三个方法
+（`save` / `remove` / `resolveKey`）并在 `src/lib/storage/index.ts` 的工厂里注册。
+业务代码不需要任何改动。
+
+> `STORAGE_DRIVER=s3` 目前会**直接报错退出**而不是静默回退到本地磁盘：
+> 生产环境误把文件写到容器本地磁盘，重启后图片会全部丢失，这种问题越早暴露越好。
+> 对象存储驱动计划在部署阶段实现。
+
+商品提交的图片地址会被校验必须来自本平台存储，避免把服务当成任意外链的图床。
 
 ## 已知限制（当前阶段）
 
 - 前端仍使用本地 Mock 数据，尚未接入真实接口（Phase 3 完成）。
-- 除 `/api/health` 外的业务接口尚未实现（Phase 2.2 起陆续补齐）。
+- 图片对象存储驱动未实现，目前只有本地磁盘驱动。
+- 商品图片的宽高字段尚未写入（前端用固定宽高比占位，暂不需要）。
+- 接口没有限流，登录接口目前没有针对暴力破解的次数限制（Phase 5 安全加固处理）。
 - 本地开发数据库的 PostgreSQL 二进制来自 `embedded-postgres` 的 beta 版本，
   仅用于开发；生产环境请使用托管数据库。
 
 ## 下一阶段
 
-Phase 2.3 实现分类与商品接口：分类列表、商品发布 / 编辑 / 改状态 / 软删除、
-公开列表（搜索、分类筛选、排序、分页）与商品详情，
-并在搜索上用 `pg_trgm` 建立 GIN 索引以支持中文关键词。
+Phase 3 前后端联调：把前端的 Mock 数据替换为真实接口。
+前端在 Phase 1 已经把接口调用集中在 `src/api/` 下，因此这一阶段主要是
+替换实现、补上鉴权头的携带方式与 401 的自动处理，页面代码不需要改动。

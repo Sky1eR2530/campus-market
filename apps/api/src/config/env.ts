@@ -26,10 +26,22 @@ const envSchema = z.object({
     .string({ error: '缺少 JWT_SECRET（未在环境变量或 apps/api/.env 中找到）' })
     .min(32, 'JWT_SECRET 至少需要 32 个字符，可用 openssl rand -base64 48 生成'),
   JWT_EXPIRES_IN: z.string().default('7d'),
+  // ---------- 图片存储 ----------
+  STORAGE_DRIVER: z.enum(['local', 's3']).default('local'),
+  /** 本地驱动的落盘目录，相对 apps/api */
+  STORAGE_LOCAL_DIR: z.string().default('uploads'),
+  /** 静态资源对外前缀，必须与本地驱动写入位置一致 */
+  STORAGE_PUBLIC_PATH: z.string().startsWith('/', '必须以 / 开头').default('/uploads'),
+  /** 对外可访问的站点地址。留空则返回相对路径，适合同源部署 */
+  PUBLIC_BASE_URL: z.string().default(''),
+  /** 单张图片大小上限（字节） */
+  MAX_UPLOAD_BYTES: z.coerce.number().int().positive().default(5 * 1024 * 1024),
   DATABASE_URL: z
     .string({ error: '缺少 DATABASE_URL（未在环境变量或 apps/api/.env 中找到）' })
     .min(1, 'DATABASE_URL 不能为空')
-    .refine((value) => value.startsWith('postgres'), 'DATABASE_URL 必须是 PostgreSQL 连接串')
+    .refine((value) => value.startsWith('postgres'), 'DATABASE_URL 必须是 PostgreSQL 连接串'),
+  /** 数据库连接池上限。部署到小规格实例时需要调小 */
+  DATABASE_POOL_SIZE: z.coerce.number().int().min(1).max(100).default(10)
 })
 
 const parsed = envSchema.safeParse(process.env)

@@ -1,16 +1,20 @@
 import { AppError } from '@campus/shared'
-import type { RequestHandler } from 'express'
-import { verifyAccessToken } from '../lib/jwt.js'
+import type { CurrentUser } from '@campus/shared'
+import type { Request, RequestHandler } from 'express'
+import { extractBearerToken, verifyAccessToken } from '../lib/jwt.js'
 import { prisma } from '../lib/prisma.js'
 import { toCurrentUser } from '../modules/users/user.mapper.js'
 
-/** 从 `Authorization: Bearer <token>` 中取出 token */
-function extractBearerToken(header: string | undefined): string | null {
-  if (!header) return null
-  const [scheme, ...rest] = header.split(' ')
-  if (!scheme || scheme.toLowerCase() !== 'bearer') return null
-  const token = rest.join(' ').trim()
-  return token || null
+/**
+ * 取出已登录用户。
+ * 用函数而不是 `req.user!`：万一中间件顺序被改动，
+ * 这里会抛出 401，而不是在后面某个地方以「undefined 上取属性」的形式炸掉。
+ */
+export function requireUser(req: Request): CurrentUser {
+  if (!req.user) {
+    throw new AppError('UNAUTHORIZED', '请先登录后再进行该操作', 401)
+  }
+  return req.user
 }
 
 /**

@@ -1,4 +1,5 @@
 import type { Response } from 'express'
+import type { PaginationMeta } from '@campus/shared'
 
 /**
  * 统一成功响应信封：{ data: ... }
@@ -6,4 +7,9 @@ import type { Response } from 'express'
  */
 export function sendData<T>(res: Response, data: T, status = 200): void {
   res.status(status).json({ data })
+}
+
+/** 列表响应：数据与分页元信息分开，前端不需要自己推算总数 */
+export function sendPage<T>(res: Response, items: T[], meta: PaginationMeta): void {
+  res.status(200).json({ data: items, meta })
 }

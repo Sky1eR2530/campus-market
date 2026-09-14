@@ -51,3 +51,12 @@ export async function verifyAccessToken(token: string): Promise<AccessTokenPaylo
     throw new AppError('UNAUTHORIZED', '登录状态已失效，请重新登录', 401)
   }
 }
+
+/** 从 `Authorization: Bearer <token>` 中取出 token，格式不对时返回 null */
+export function extractBearerToken(header: string | undefined): string | null {
+  if (!header) return null
+  const [scheme, ...rest] = header.split(' ')
+  if (!scheme || scheme.toLowerCase() !== 'bearer') return null
+  const token = rest.join(' ').trim()
+  return token || null
+}

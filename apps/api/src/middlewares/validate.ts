@@ -1,6 +1,7 @@
 import { AppError } from '@campus/shared'
 import type { RequestHandler } from 'express'
 import type { ZodType } from 'zod'
+import { toFieldIssues } from '../utils/validation.js'
 
 /**
  * 用 Zod schema 校验请求体。
@@ -12,11 +13,7 @@ export function validateBody(schema: ZodType): RequestHandler {
     const result = schema.safeParse(req.body)
 
     if (!result.success) {
-      const details = result.error.issues.map((issue) => ({
-        field: issue.path.join('.') || '_',
-        message: issue.message
-      }))
-      next(new AppError('VALIDATION_FAILED', '请求参数校验失败', 422, details))
+      next(new AppError('VALIDATION_FAILED', '请求参数校验失败', 422, toFieldIssues(result.error)))
       return
     }
 

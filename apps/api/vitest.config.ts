@@ -14,7 +14,9 @@ export default defineConfig({
       DATABASE_URL: url,
       JWT_SECRET: 'test-only-secret-please-do-not-use-in-production',
       JWT_EXPIRES_IN: '1h',
-      LOG_LEVEL: 'error'
+      LOG_LEVEL: 'error',
+      // 测试里不需要真的传 5MB 图片，把上限调小以便验证超限分支
+      MAX_UPLOAD_BYTES: '4096'
     },
     // 所有用例共用同一个测试库，串行执行避免互相清表
     fileParallelism: false,

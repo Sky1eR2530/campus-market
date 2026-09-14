@@ -126,6 +126,11 @@ model Item {
   @@index([status, publishedAt(sort: Desc)])
   @@index([categoryId, status, publishedAt(sort: Desc)])
   @@index([sellerId, createdAt(sort: Desc)])
+  /// 中文关键词搜索：PostgreSQL 默认的全文检索分词器对中文基本无效，
+  /// 因此改用 pg_trgm 三元组索引来加速 ILIKE '%关键词%'。
+  /// 扩展本身在迁移 SQL 中创建（见 migrations/*_add_trgm_search_index）。
+  @@index([title(ops: raw("gin_trgm_ops"))], type: Gin, map: "items_title_trgm_idx")
+  @@index([description(ops: raw("gin_trgm_ops"))], type: Gin, map: "items_description_trgm_idx")
   @@map("items")
 }
 

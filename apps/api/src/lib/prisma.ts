@@ -1,12 +1,22 @@
 import { PrismaPg } from '@prisma/adapter-pg'
+import { Pool } from 'pg'
 import { env, isDevelopment } from '../config/env.js'
 import { PrismaClient } from '../generated/prisma/client.js'
 
 /**
  * Prisma 7 的直连方式：连接串不写在 schema 里，而是交给 driver adapter。
- * 换数据库或接入连接池（如 Neon 的 pooler）时只需要在这里调整。
+ * 这里显式创建连接池而不是把连接串交给适配器内部处理：
+ * 池大小直接决定并发能力，部署到小规格实例时需要能直接调整。
+ * 接入 Neon 的连接池地址时同样只需要改这里。
  */
-const adapter = new PrismaPg({ connectionString: env.DATABASE_URL })
+const pool = new Pool({
+  connectionString: env.DATABASE_URL,
+  max: env.DATABASE_POOL_SIZE,
+  idleTimeoutMillis: 30_000,
+  connectionTimeoutMillis: 10_000
+})
+
+const adapter = new PrismaPg(pool)
 
 export const prisma = new PrismaClient({
   adapter,
@@ -98,4 +108,5 @@ export async function checkDatabase(): Promise<DatabaseStatus> {
 
 export async function disconnectDatabase(): Promise<void> {
   await prisma.$disconnect()
+  await pool.end()
 }
