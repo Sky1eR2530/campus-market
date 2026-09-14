@@ -12,7 +12,7 @@
 | Phase 1 | 前端 UI / MVP 页面（Mock 数据） | 已完成 |
 | Phase 2 | 后端 API 与数据库 | 进行中 |
 | 2.1 | 工程骨架、环境变量校验、Prisma 模型、迁移、种子数据、健康检查 | 已完成 |
-| 2.2 | 认证模块（注册 / 登录 / JWT） | 待开始 |
+| 2.2 | 认证模块（注册 / 登录 / JWT / 鉴权中间件 / 接口测试） | 已完成 |
 | 2.3 | 分类与商品 CRUD、状态机 | 待开始 |
 | 2.4 | 图片上传（存储抽象层） | 待开始 |
 | 2.5 | 收藏与用户资料 | 待开始 |
@@ -159,8 +159,15 @@ pnpm dev              # 前端：http://localhost:5173
 | 方法 | 路径 | 说明 |
 | --- | --- | --- |
 | GET | `/api/health` | 服务与依赖状态。数据库正常返回 200，不可用返回 503 |
+| POST | `/api/auth/register` | 注册并直接登录，返回 token |
+| POST | `/api/auth/login` | 登录，返回 token |
+| GET | `/api/auth/me` | 获取当前登录用户（需要 `Authorization: Bearer <token>`） |
+| POST | `/api/auth/logout` | 登出，返回 204 |
 
-响应示例：
+成功响应统一为 `{ "data": ... }`，错误响应统一为
+`{ "error": { "code": "...", "message": "...", "details": [] } }`。
+
+`GET /api/health` 响应示例：
 
 ```json
 {
@@ -172,7 +179,26 @@ pnpm dev              # 前端：http://localhost:5173
 }
 ```
 
-错误响应统一为 `{ "error": { "code": "...", "message": "...", "details": [] } }`。
+`POST /api/auth/register` 请求示例：
+
+```bash
+curl -X POST http://localhost:3000/api/auth/register \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"you@campus.edu","nickname":"你的昵称","password":"campus1234"}'
+```
+
+### 认证状态码约定
+
+| 状态码 | 场景 |
+| --- | --- |
+| 200 / 201 | 成功 |
+| 401 | 未登录、token 无效或过期、邮箱或密码错误 |
+| 403 | 账号被封禁 |
+| 409 | 邮箱已被注册 |
+| 422 | 请求参数校验失败，`details` 中给出具体字段 |
+
+出于安全考虑，「邮箱不存在」与「密码错误」返回完全相同的状态码与消息，
+避免攻击者借此枚举平台上注册过哪些邮箱。
 
 ## 演示账号
 
@@ -229,6 +255,6 @@ curl http://localhost:3000/api/health
 
 ## 下一阶段
 
-Phase 2.2 实现认证模块：注册、登录、JWT 签发与校验、鉴权中间件，
-以及密码的 bcrypt 哈希存储。验收标准是弱密码与重复邮箱被拒、
-数据库中不出现明文密码、无 token 访问受保护接口返回 401。
+Phase 2.3 实现分类与商品接口：分类列表、商品发布 / 编辑 / 改状态 / 软删除、
+公开列表（搜索、分类筛选、排序、分页）与商品详情，
+并在搜索上用 `pg_trgm` 建立 GIN 索引以支持中文关键词。

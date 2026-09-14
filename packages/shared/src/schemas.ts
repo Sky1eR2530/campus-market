@@ -6,6 +6,7 @@ import {
   MAX_ITEM_IMAGES,
   NICKNAME_MAX,
   NICKNAME_MIN,
+  PASSWORD_MAX,
   PASSWORD_MIN,
   PRICE_MAX_CENTS,
   TITLE_MAX,
@@ -29,22 +30,33 @@ export const loginSchema = z.object({
   password: z.string().min(1, '请输入密码').min(PASSWORD_MIN, `密码至少 ${PASSWORD_MIN} 位`)
 })
 
-export const registerSchema = z
-  .object({
-    email,
-    nickname: z
-      .string()
-      .min(1, '请输入昵称')
-      .min(NICKNAME_MIN, `昵称至少 ${NICKNAME_MIN} 个字`)
-      .max(NICKNAME_MAX, `昵称最多 ${NICKNAME_MAX} 个字`),
-    password: z
-      .string()
-      .min(1, '请设置密码')
-      .min(PASSWORD_MIN, `密码至少 ${PASSWORD_MIN} 位`)
-      .regex(/[a-zA-Z]/, '密码需要包含字母')
-      .regex(/\d/, '密码需要包含数字'),
-    confirmPassword: z.string().min(1, '请再次输入密码')
-  })
+const nickname = z
+  .string()
+  .trim()
+  .min(1, '请输入昵称')
+  .min(NICKNAME_MIN, `昵称至少 ${NICKNAME_MIN} 个字`)
+  .max(NICKNAME_MAX, `昵称最多 ${NICKNAME_MAX} 个字`)
+
+const password = z
+  .string()
+  .min(1, '请设置密码')
+  .min(PASSWORD_MIN, `密码至少 ${PASSWORD_MIN} 位`)
+  .max(PASSWORD_MAX, `密码最多 ${PASSWORD_MAX} 位`)
+  .regex(/[a-zA-Z]/, '密码需要包含字母')
+  .regex(/\d/, '密码需要包含数字')
+
+/**
+ * 注册接口的请求体。后端只需要这三个字段。
+ */
+export const registerPayloadSchema = z.object({ email, nickname, password })
+export type RegisterPayloadValues = z.infer<typeof registerPayloadSchema>
+
+/**
+ * 注册表单的校验规则：在请求体之上加了「确认密码」。
+ * 两个 schema 共用同一份字段规则，不会出现前后端校验不一致。
+ */
+export const registerSchema = registerPayloadSchema
+  .extend({ confirmPassword: z.string().min(1, '请再次输入密码') })
   .refine((v) => v.password === v.confirmPassword, {
     path: ['confirmPassword'],
     message: '两次输入的密码不一致'

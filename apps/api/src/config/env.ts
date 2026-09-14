@@ -22,6 +22,10 @@ const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   PORT: z.coerce.number().int().min(1).max(65535).default(3000),
   LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
+  JWT_SECRET: z
+    .string({ error: '缺少 JWT_SECRET（未在环境变量或 apps/api/.env 中找到）' })
+    .min(32, 'JWT_SECRET 至少需要 32 个字符，可用 openssl rand -base64 48 生成'),
+  JWT_EXPIRES_IN: z.string().default('7d'),
   DATABASE_URL: z
     .string({ error: '缺少 DATABASE_URL（未在环境变量或 apps/api/.env 中找到）' })
     .min(1, 'DATABASE_URL 不能为空')

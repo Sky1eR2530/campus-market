@@ -53,6 +53,11 @@ export const DESCRIPTION_MAX = 1000
 export const NICKNAME_MIN = 2
 export const NICKNAME_MAX = 20
 export const PASSWORD_MIN = 6
+/**
+ * bcrypt 只使用前 72 个字节，超出部分会被静默忽略。
+ * 与其让用户以为长密码更安全，不如在入口处直接拒绝。
+ */
+export const PASSWORD_MAX = 64
 export const BIO_MAX = 200
 
 /** 价格上限：99999.99 元 */
