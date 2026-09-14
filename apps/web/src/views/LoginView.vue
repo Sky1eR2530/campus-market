@@ -2,7 +2,7 @@
 import { loginSchema } from '@campus/shared'
 import { reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { DEMO_ACCOUNT } from '@/api/mock/data'
+import { DEMO_ACCOUNT } from '@/config/demo'
 import AuthLayout from '@/layouts/AuthLayout.vue'
 import AppButton from '@/components/ui/AppButton.vue'
 import AppIcon from '@/components/ui/AppIcon.vue'

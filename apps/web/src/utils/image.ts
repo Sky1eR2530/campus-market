@@ -1,20 +1,30 @@
 import { ALLOWED_IMAGE_TYPES, MAX_IMAGE_BYTES } from '@campus/shared'
 
 /**
- * 图片在浏览器端先压缩再处理。
- * Phase 1 用于控制 Mock 数据的存储体积；Phase 2 之后同样能显著减少上传带宽。
+ * 上传前的图片处理。
+ *
+ * 手机拍摄的照片动辄 3~8MB，直接上传既容易超出服务端上限，
+ * 在校园网环境下也明显拖慢发布速度。这里在浏览器端先压缩再上传。
  */
 
-const MAX_EDGE = 1280
-const JPEG_QUALITY = 0.78
+const MAX_EDGE = 1600
+const JPEG_QUALITY = 0.82
+/** 小于这个体积就不压缩：收益有限，反而损失画质 */
+const COMPRESS_THRESHOLD_BYTES = 1024 * 1024
+/** 原始文件的硬上限。超过这个体积基本不是正常拍摄的照片，直接拒绝 */
+const MAX_SOURCE_BYTES = 20 * 1024 * 1024
+
+function toMb(bytes: number): number {
+  return Math.round(bytes / 1024 / 1024)
+}
 
 /** 上传前的即时校验，返回错误文案；通过则返回 null */
 export function validateImageFile(file: File): string | null {
   if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
     return `「${file.name}」格式不支持，请上传 JPG / PNG / WebP 图片`
   }
-  if (file.size > MAX_IMAGE_BYTES) {
-    return `「${file.name}」超过 ${Math.round(MAX_IMAGE_BYTES / 1024 / 1024)}MB，请压缩后重试`
+  if (file.size > MAX_SOURCE_BYTES) {
+    return `「${file.name}」超过 ${toMb(MAX_SOURCE_BYTES)}MB，请换一张图片`
   }
   return null
 }
@@ -35,8 +45,14 @@ function loadImage(file: File): Promise<HTMLImageElement> {
   })
 }
 
-/** 读取本地图片 → 等比缩放 → 输出 JPEG data URL */
-export async function fileToCompressedDataUrl(file: File): Promise<string> {
+function canvasToBlob(canvas: HTMLCanvasElement): Promise<Blob | null> {
+  return new Promise((resolve) => {
+    canvas.toBlob((blob) => resolve(blob), 'image/jpeg', JPEG_QUALITY)
+  })
+}
+
+/** 把图片等比缩放并转成 JPEG */
+async function compress(file: File): Promise<File> {
   const image = await loadImage(file)
   const scale = Math.min(1, MAX_EDGE / Math.max(image.naturalWidth, image.naturalHeight))
   const width = Math.max(1, Math.round(image.naturalWidth * scale))
@@ -54,5 +70,29 @@ export async function fileToCompressedDataUrl(file: File): Promise<string> {
   context.fillRect(0, 0, width, height)
   context.drawImage(image, 0, 0, width, height)
 
-  return canvas.toDataURL('image/jpeg', JPEG_QUALITY)
+  const blob = await canvasToBlob(canvas)
+  if (!blob) throw new Error('图片压缩失败，请重试')
+
+  // 压缩后反而更大（例如本身就是高压缩率的 WebP），保留原图
+  if (blob.size >= file.size) return file
+
+  const name = `${file.name.replace(/\.[^.]+$/, '')}.jpg`
+  return new File([blob], name, { type: 'image/jpeg', lastModified: Date.now() })
+}
+
+/**
+ * 校验并把图片处理成适合上传的文件。
+ * 小图原样返回；大图压缩后再检查是否仍然超出服务端上限。
+ */
+export async function prepareImageForUpload(file: File): Promise<File> {
+  const invalid = validateImageFile(file)
+  if (invalid) throw new Error(invalid)
+
+  const prepared = file.size > COMPRESS_THRESHOLD_BYTES ? await compress(file) : file
+
+  if (prepared.size > MAX_IMAGE_BYTES) {
+    throw new Error(`「${file.name}」压缩后仍超过 ${toMb(MAX_IMAGE_BYTES)}MB，请换一张图片`)
+  }
+
+  return prepared
 }

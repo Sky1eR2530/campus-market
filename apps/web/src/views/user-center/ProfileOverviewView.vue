@@ -1,26 +1,20 @@
 <script setup lang="ts">
 import type { MyStats } from '@campus/shared'
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { fetchMyStats } from '@/api/users'
-import { resetMockData } from '@/api/mock'
-import AppButton from '@/components/ui/AppButton.vue'
 import AppErrorState from '@/components/ui/AppErrorState.vue'
 import AppIcon from '@/components/ui/AppIcon.vue'
-import ConfirmDialog from '@/components/ui/ConfirmDialog.vue'
 import type { IconName } from '@/components/ui/icons'
 import { useAsync } from '@/composables/useAsync'
 import { usePageMeta } from '@/composables/usePageMeta'
-import { useToast } from '@/composables/useToast'
 import { useAuthStore } from '@/stores/auth'
 import { formatDate } from '@/utils/format'
 
 const auth = useAuthStore()
 const router = useRouter()
-const toast = useToast()
 
 const stats = useAsync<MyStats>(fetchMyStats)
-const resetOpen = ref(false)
 
 usePageMeta('用户中心')
 
@@ -42,14 +36,6 @@ function goToItems(status: string | null): void {
   void router.push({ name: 'me-items', query: { status } })
 }
 
-async function onReset(): Promise<void> {
-  resetMockData()
-  resetOpen.value = false
-  toast.success('演示数据已重置')
-  // 重置后本地不再有登录态，回到首页让守卫重新引导
-  auth.setUser(null)
-  await router.push({ name: 'home' })
-}
 </script>
 
 <template>
@@ -137,28 +123,6 @@ async function onReset(): Promise<void> {
       </dl>
     </section>
 
-    <section class="card card--pad dev">
-      <div>
-        <h2 class="dev__title">演示环境</h2>
-        <p class="dev__desc">
-          当前使用浏览器本地数据。重置后会清空你发布的商品、收藏和注册的账号，恢复到初始状态。
-        </p>
-      </div>
-      <AppButton variant="secondary" size="sm" @click="resetOpen = true">
-        <AppIcon name="refresh" :size="15" />
-        <span>重置演示数据</span>
-      </AppButton>
-    </section>
-
-    <ConfirmDialog
-      :open="resetOpen"
-      title="重置演示数据？"
-      message="这会清空本地保存的商品、收藏与账号数据，并回到初始演示状态。该操作无法撤销。"
-      confirm-text="确认重置"
-      tone="danger"
-      @confirm="onReset"
-      @cancel="resetOpen = false"
-    />
   </section>
 </template>
 
@@ -254,25 +218,6 @@ async function onReset(): Promise<void> {
   grid-column: 1 / -1;
 }
 
-.dev {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  border-style: dashed;
-}
-
-.dev__title {
-  font-size: var(--text-sm);
-  font-weight: var(--weight-semibold);
-}
-
-.dev__desc {
-  margin-top: var(--space-1);
-  font-size: var(--text-sm);
-  color: var(--text-tertiary);
-  line-height: var(--leading-relaxed);
-}
-
 @media (min-width: 768px) {
   .overview__title {
     font-size: var(--text-2xl);
@@ -282,10 +227,5 @@ async function onReset(): Promise<void> {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
-  .dev {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-  }
 }
 </style>

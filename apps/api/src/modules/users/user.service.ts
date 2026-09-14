@@ -1,6 +1,7 @@
 import { AppError } from '@campus/shared'
 import type {
   CurrentUser,
+  MyStats,
   SellerProfile,
   UpdateProfilePayloadValues
 } from '@campus/shared'
@@ -99,4 +100,32 @@ export async function getSellerProfile(
     // 联系方式只对已登录用户返回
     Boolean(viewerId)
   )
+}
+
+/**
+ * 当前用户的发布与收藏概览，供用户中心展示。
+ * 用一次 groupBy 拿到各状态数量，避免为每个状态单独发一次 count 查询。
+ */
+export async function getMyStats(userId: string): Promise<MyStats> {
+  const [grouped, favorites] = await Promise.all([
+    prisma.item.groupBy({
+      by: ['status'],
+      where: { sellerId: userId, deletedAt: null },
+      _count: { _all: true }
+    }),
+    prisma.favorite.count({ where: { userId } })
+  ])
+
+  const countByStatus = new Map(grouped.map((row) => [row.status, row._count._all]))
+  const onSale = countByStatus.get('on_sale') ?? 0
+  const sold = countByStatus.get('sold') ?? 0
+  const offShelf = countByStatus.get('off_shelf') ?? 0
+
+  return {
+    published: onSale + sold + offShelf,
+    onSale,
+    sold,
+    offShelf,
+    favorites
+  }
 }

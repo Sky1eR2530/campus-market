@@ -164,3 +164,44 @@ describe('GET /api/users/:id', () => {
     expect(res.body.data).not.toHaveProperty('status')
   })
 })
+
+describe('GET /api/users/me/stats', () => {
+  it('未登录不能访问', async () => {
+    const res = await request(app).get('/api/users/me/stats')
+
+    expect(res.status).toBe(401)
+  })
+
+  it('按状态返回发布数量与收藏数量', async () => {
+    await seedItem({ sellerId: user.user.id, categoryId, status: 'on_sale' })
+    await seedItem({ sellerId: user.user.id, categoryId, status: 'on_sale' })
+    await seedItem({ sellerId: user.user.id, categoryId, status: 'sold' })
+    await seedItem({ sellerId: user.user.id, categoryId, status: 'off_shelf' })
+
+    const otherItem = await seedItem({ sellerId: viewer.user.id, categoryId })
+    await request(app).post(`/api/favorites/${otherItem.id}`).set('Authorization', user.auth)
+
+    const res = await request(app).get('/api/users/me/stats').set('Authorization', user.auth)
+
+    expect(res.status).toBe(200)
+    expect(res.body.data).toEqual({
+      published: 4,
+      onSale: 2,
+      sold: 1,
+      offShelf: 1,
+      favorites: 1
+    })
+  })
+
+  it('软删除的商品不计入统计', async () => {
+    await seedItem({ sellerId: user.user.id, categoryId })
+    await prisma.item.updateMany({
+      where: { sellerId: user.user.id },
+      data: { deletedAt: new Date() }
+    })
+
+    const res = await request(app).get('/api/users/me/stats').set('Authorization', user.auth)
+
+    expect(res.body.data.published).toBe(0)
+  })
+})

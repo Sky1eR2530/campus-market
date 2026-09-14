@@ -1,6 +1,6 @@
 import type { Category } from '@campus/shared'
-import { mockApi } from './mock'
+import { requestData } from './http'
 
 export function fetchCategories(): Promise<Category[]> {
-  return mockApi.fetchCategories()
+  return requestData<Category[]>({ url: '/categories' })
 }

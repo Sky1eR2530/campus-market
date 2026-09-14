@@ -6,28 +6,33 @@ import type {
   Paginated,
   UpdateItemPayload
 } from '@campus/shared'
-import { mockApi } from './mock'
+import { http, requestData, requestList } from './http'
 
 export function fetchItems(query: ItemQuery = {}): Promise<Paginated<Item>> {
-  return mockApi.fetchItems(query)
+  // axios 会自动忽略值为 undefined 的查询参数
+  return requestList<Item>({ url: '/items', params: query })
 }
 
 export function fetchItem(itemId: string): Promise<Item> {
-  return mockApi.fetchItem(itemId)
+  return requestData<Item>({ url: `/items/${itemId}` })
 }
 
 export function createItem(payload: CreateItemPayload): Promise<Item> {
-  return mockApi.createItem(payload)
+  return requestData<Item>({ url: '/items', method: 'POST', data: payload })
 }
 
 export function updateItem(itemId: string, payload: UpdateItemPayload): Promise<Item> {
-  return mockApi.updateItem(itemId, payload)
+  return requestData<Item>({ url: `/items/${itemId}`, method: 'PATCH', data: payload })
 }
 
 export function updateItemStatus(itemId: string, status: ItemStatus): Promise<Item> {
-  return mockApi.updateItemStatus(itemId, status)
+  return requestData<Item>({
+    url: `/items/${itemId}/status`,
+    method: 'PATCH',
+    data: { status }
+  })
 }
 
-export function deleteItem(itemId: string): Promise<void> {
-  return mockApi.deleteItem(itemId)
+export async function deleteItem(itemId: string): Promise<void> {
+  await http.delete(`/items/${itemId}`)
 }

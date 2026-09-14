@@ -1,14 +1,14 @@
 import type { CurrentUser, MyStats, SellerProfile, UpdateProfilePayload } from '@campus/shared'
-import { mockApi } from './mock'
+import { requestData } from './http'
 
 export function fetchSellerProfile(userId: string): Promise<SellerProfile> {
-  return mockApi.fetchSellerProfile(userId)
+  return requestData<SellerProfile>({ url: `/users/${userId}` })
 }
 
 export function updateProfile(payload: UpdateProfilePayload): Promise<CurrentUser> {
-  return mockApi.updateProfile(payload)
+  return requestData<CurrentUser>({ url: '/users/me', method: 'PATCH', data: payload })
 }
 
 export function fetchMyStats(): Promise<MyStats> {
-  return mockApi.fetchMyStats()
+  return requestData<MyStats>({ url: '/users/me/stats' })
 }

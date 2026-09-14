@@ -1,26 +1,22 @@
 import { AppError } from '@campus/shared'
-import { fileToCompressedDataUrl, validateImageFile } from '@/utils/image'
-
-/**
- * 图片上传。
- *
- * Phase 1：在浏览器端压缩后以 data URL 返回，不经过服务器。
- * Phase 2：换成 `POST /api/uploads/images` 的 multipart 请求，
- *          服务端写入对象存储并返回可访问的 URL —— 页面层无需改动。
- */
+import { prepareImageForUpload } from '@/utils/image'
+import { requestData } from './http'
 
 export interface UploadedImage {
   url: string
   key: string
 }
 
+/**
+ * 上传商品图片。
+ *
+ * 上传前会在浏览器端压缩：手机拍的照片动辄 3~5MB，既容易超出服务端上限，
+ * 在校园网环境下也明显拖慢发布速度。
+ */
 export async function uploadImage(file: File): Promise<UploadedImage> {
-  const invalid = validateImageFile(file)
-  if (invalid) throw new AppError('VALIDATION_FAILED', invalid, 422)
-
+  let prepared: File
   try {
-    const url = await fileToCompressedDataUrl(file)
-    return { url, key: `local/${Date.now()}-${file.name}` }
+    prepared = await prepareImageForUpload(file)
   } catch (error) {
     throw new AppError(
       'UPLOAD_FAILED',
@@ -28,12 +24,10 @@ export async function uploadImage(file: File): Promise<UploadedImage> {
       500
     )
   }
-}
 
-export async function uploadImages(files: File[]): Promise<UploadedImage[]> {
-  const results: UploadedImage[] = []
-  for (const file of files) {
-    results.push(await uploadImage(file))
-  }
-  return results
+  const form = new FormData()
+  form.append('file', prepared)
+
+  // 不手动设置 Content-Type，交给 axios 生成带 boundary 的 multipart 头
+  return requestData<UploadedImage>({ url: '/uploads/images', method: 'POST', data: form })
 }
