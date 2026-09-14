@@ -27,10 +27,12 @@
     "db:local": "pnpm --filter @campus/api local-db",
     "db:generate": "pnpm --filter @campus/api db:generate",
     "db:migrate": "pnpm --filter @campus/api db:migrate",
+    "db:deploy": "pnpm --filter @campus/api db:deploy",
     "db:seed": "pnpm --filter @campus/api db:seed",
     "db:reset": "pnpm --filter @campus/api db:reset",
     "db:cleanup-demo": "pnpm --filter @campus/api db:cleanup-demo",
-    "db:studio": "pnpm --filter @campus/api db:studio"
+    "db:studio": "pnpm --filter @campus/api db:studio",
+    "verify:api": "pnpm --filter @campus/api verify:api"
   },
   "devDependencies": {
     "axe-core": "^4.13.0"
