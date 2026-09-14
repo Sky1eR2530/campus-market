@@ -8,6 +8,43 @@ importers:
 
   .: {}
 
+  apps/admin:
+    dependencies:
+      '@campus/api-client':
+        specifier: workspace:*
+        version: link:../../packages/api-client
+      '@campus/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
+      '@campus/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
+      pinia:
+        specifier: ^4.0.3
+        version: 4.0.3(@vue/devtools-api@8.2.1)(typescript@5.9.3)(vue@3.5.42(typescript@5.9.3))
+      vue:
+        specifier: ^3.5.42
+        version: 3.5.42(typescript@5.9.3)
+      vue-router:
+        specifier: ^5.3.1
+        version: 5.3.1(@vue/compiler-sfc@3.5.42)(esbuild@0.28.2)(pinia@4.0.3(@vue/devtools-api@8.2.1)(typescript@5.9.3)(vue@3.5.42(typescript@5.9.3)))(rolldown@1.2.8)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.13)(yaml@2.9.1))(vue@3.5.42(typescript@5.9.3))
+    devDependencies:
+      '@types/node':
+        specifier: ^26.5.1
+        version: 26.5.1
+      '@vitejs/plugin-vue':
+        specifier: ^6.0.8
+        version: 6.0.8(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.13)(yaml@2.9.1))(vue@3.5.42(typescript@5.9.3))
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vite:
+        specifier: ^8.3.0
+        version: 8.3.0(@types/node@26.5.1)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.13)(yaml@2.9.1)
+      vue-tsc:
+        specifier: ^3.3.11
+        version: 3.3.11(typescript@5.9.3)
+
   apps/api:
     dependencies:
       '@campus/shared':
@@ -77,6 +114,15 @@ importers:
 
   apps/web:
     dependencies:
+      '@campus/api-client':
+        specifier: workspace:*
+        version: link:../../packages/api-client
+      '@campus/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
+      '@campus/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
       axios:
         specifier: ^1.20.0
         version: 1.20.0(debug@4.4.3)
@@ -109,6 +155,19 @@ importers:
         specifier: ^3.3.11
         version: 3.3.11(typescript@5.9.3)
 
+  packages/api-client:
+    dependencies:
+      '@campus/shared':
+        specifier: workspace:*
+        version: link:../shared
+      axios:
+        specifier: ^1.20.0
+        version: 1.20.0(debug@4.4.3)
+    devDependencies:
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+
   packages/shared:
     dependencies:
       zod:
@@ -118,6 +177,25 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
+
+  packages/ui:
+    dependencies:
+      '@campus/api-client':
+        specifier: workspace:*
+        version: link:../api-client
+      '@campus/shared':
+        specifier: workspace:*
+        version: link:../shared
+    devDependencies:
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vue:
+        specifier: ^3.5.42
+        version: 3.5.42(typescript@5.9.3)
+      vue-tsc:
+        specifier: ^3.3.11
+        version: 3.3.11(typescript@5.9.3)
 
 packages:
 

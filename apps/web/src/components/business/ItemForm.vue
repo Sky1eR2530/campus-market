@@ -8,16 +8,12 @@ import {
   itemFormSchema
 } from '@campus/shared'
 import { computed, reactive, ref, watch } from 'vue'
-import { fetchCategories } from '@/api/categories'
-import AppButton from '@/components/ui/AppButton.vue'
-import AppIcon from '@/components/ui/AppIcon.vue'
+import { fetchCategories } from '@campus/api-client'
+import { AppButton, AppIcon, AppSkeleton, CATEGORY_ICON_NAMES, useAsync } from '@campus/ui'
 import AppImageUploader from '@/components/ui/AppImageUploader.vue'
 import AppInput from '@/components/ui/AppInput.vue'
-import AppSkeleton from '@/components/ui/AppSkeleton.vue'
 import AppTextarea from '@/components/ui/AppTextarea.vue'
-import { CATEGORY_ICON_NAMES } from '@/components/ui/icons'
-import { useAsync } from '@/composables/useAsync'
-import { centsToYuanInput, yuanToCents } from '@/utils/format'
+import { centsToYuanInput, yuanToCents } from '@campus/shared'
 import { shouldShowError, validate } from '@/utils/validation'
 
 /**

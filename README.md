@@ -18,7 +18,7 @@
 | 2.5 | 收藏与用户资料 | 已完成 |
 | 2.6 | 接口层测试 | 已完成（88 个用例） |
 | Phase 3 | 前后端联调（Mock 替换为真实接口） | 已完成 |
-| Phase 4 | 管理后台 | 待开始 |
+| Phase 4 | 管理后台（用户 / 商品 / 分类管理 + 操作日志） | 已完成 |
 | Phase 5 | 测试与优化 | 待开始 |
 | Phase 6 | 部署上线 | 待开始 |
 | Phase 7 | 真实用户测试与迭代 | 待开始 |
@@ -33,6 +33,17 @@
 - **校验**：Zod，规则定义在共享包中，前后端复用同一份 schema
 - **样式**：原生 CSS + 设计令牌（CSS 变量），自研基础组件，不引入重型 UI 库
 - **包管理**：pnpm workspace（monorepo）
+
+仓库里有三个应用与三个共享包：
+
+| 包 | 说明 |
+| --- | --- |
+| `apps/web` | 学生端 SPA |
+| `apps/admin` | 管理后台 SPA |
+| `apps/api` | 后端服务 |
+| `packages/shared` | 前后端共享的类型、常量、校验规则与格式化函数 |
+| `packages/api-client` | HTTP 客户端与接口封装，被两个前端共用 |
+| `packages/ui` | 设计令牌、基础样式与基础组件，被两个前端共用 |
 
 ## 目录结构
 
@@ -51,6 +62,15 @@
 │  │     ├─ styles/            # 设计令牌与全局样式
 │  │     ├─ utils/             # 格式化、校验、图片处理等
 │  │     └─ views/             # 页面
+│  ├─ admin/                   # 管理后台 SPA
+│  │  └─ src/
+│  │     ├─ components/        # 后台专用组件（提示条、分页）
+│  │     ├─ composables/       # 列表加载与分页
+│  │     ├─ layouts/           # 侧边栏布局
+│  │     ├─ router/            # 路由与管理员守卫
+│  │     ├─ stores/            # 登录态与提示
+│  │     ├─ styles/            # 后台专属样式（表格、工具条）
+│  │     └─ views/             # 概览 / 用户 / 商品 / 分类 / 日志
 │  └─ api/                     # 后端 API
 │     ├─ prisma/
 │     │  ├─ schema.prisma      # 数据模型
@@ -66,7 +86,9 @@
 │     │  └─ index.ts           # 进程入口与优雅退出
 │     └─ prisma.config.ts      # Prisma 7 配置（schema 路径、seed 命令、连接串）
 ├─ packages/
-│  └─ shared/                  # 前后端共享的类型、常量与校验规则（构建到 dist 后供双方消费）
+│  ├─ shared/                  # 共享类型、常量、校验规则与格式化（构建到 dist 后供各方消费）
+│  ├─ api-client/              # 共享 HTTP 客户端与接口封装
+│  └─ ui/                      # 共享设计令牌、基础样式与基础组件
 ├─ docs/
 └─ work/                       # 本地验证脚本与截图（不进入 Git）
 ```
@@ -119,15 +141,17 @@ pnpm db:seed          # 写入分类与演示账号（可重复执行）
 ```bash
 pnpm dev:api          # 后端：http://localhost:3000
 pnpm dev              # 前端：http://localhost:5173
+pnpm dev:admin        # 管理后台：http://localhost:5174
 ```
 
-两个命令分别在两个终端里运行。
+三个命令分别在不同终端里运行。
 
 ## 常用命令
 
 | 命令 | 说明 |
 | --- | --- |
 | `pnpm dev` | 启动前端开发服务器（5173） |
+| `pnpm dev:admin` | 启动管理后台开发服务器（5174） |
 | `pnpm dev:api` | 启动后端开发服务器（3000，带热重载） |
 | `pnpm build` | 构建共享包 + 前端 + 后端 |
 | `pnpm typecheck` | 全部包类型检查 |
@@ -138,6 +162,8 @@ pnpm dev              # 前端：http://localhost:5173
 | `pnpm db:reset` | 清空并重建数据库（会丢数据） |
 | `pnpm db:studio` | 打开 Prisma Studio 可视化查看数据 |
 | `pnpm verify:api` | 对运行中的 API 做完整链路冒烟（需先启动后端） |
+| `pnpm smoke:web` | 学生端端到端冒烟（需先启动前端与后端） |
+| `pnpm smoke:admin` | 管理后台端到端冒烟（需先启动管理端与后端） |
 
 > 如果环境里没有全局 `pnpm`，可以用 `corepack enable` 启用，
 > 或直接调用任意可用的 pnpm 可执行文件，例如
@@ -178,6 +204,27 @@ pnpm dev              # 前端：http://localhost:5173
 | GET | `/api/favorites/ids` | 我的收藏 id 列表，供前端标记爱心状态 |
 | PATCH | `/api/users/me` | 编辑个人资料 |
 | GET | `/api/users/:id` | 卖家主页信息与商品统计 |
+| GET | `/api/users/me/stats` | 当前用户的发布与收藏概览 |
+
+### 管理后台接口
+
+以下接口都要求登录且角色为 `admin`。前端隐藏入口只是体验层，权限判断在服务端。
+
+| 方法 | 路径 | 说明 |
+| --- | --- | --- |
+| GET | `/api/admin/stats` | 平台概览 |
+| GET | `/api/admin/users` | 用户列表（搜索、状态筛选、分页） |
+| PATCH | `/api/admin/users/:id/status` | 封禁 / 解封，可带原因 |
+| GET | `/api/admin/items` | 商品列表（搜索、状态与分类筛选、可查看已删除） |
+| PATCH | `/api/admin/items/:id/status` | 下架 / 恢复，可带原因 |
+| DELETE | `/api/admin/items/:id` | 软删除商品 |
+| GET | `/api/admin/categories` | 全部分类（含已停用） |
+| POST | `/api/admin/categories` | 新增分类 |
+| PATCH | `/api/admin/categories/:id` | 修改分类 |
+| DELETE | `/api/admin/categories/:id` | 删除分类（分类下有商品时拒绝） |
+| GET | `/api/admin/actions` | 操作日志 |
+
+所有写操作都会写入 `admin_actions` 表，记录操作人、对象、动作与原因，可追溯。
 
 标注「可选」的公开接口使用可选鉴权：未登录正常返回内容，已登录时额外返回
 「我是否收藏了它」以及卖家联系方式。
@@ -225,9 +272,10 @@ curl -X POST http://localhost:3000/api/auth/register \
 | 角色 | 邮箱 | 密码 |
 | --- | --- | --- |
 | 学生用户 | `demo@campus.edu` | `demo1234` |
-| 管理员 | `admin@campus.edu` | `admin1234` |
+| 管理员 | `admin@campus.edu` | `admin1234`（用于登录管理后台 5174） |
 
 前端登录页提供「一键填入演示账号」，Phase 3 接入真实接口后即可用它们登录。
+管理后台的登录页同样提供一键填入。
 
 ## 本地验证
 
@@ -251,6 +299,13 @@ curl http://localhost:3000/api/health
 ```
 
 数据库不可用时该接口返回 503，并在 `checks.database.error` 中给出原因（例如 `ECONNREFUSED`）。
+
+**管理后台**：另一个 Playwright 脚本，覆盖登录拦截、权限拒绝、用户封禁 / 解封、
+商品下架 / 恢复、分类增删与操作日志（需要先启动 `pnpm dev:admin`）。
+
+```bash
+node work/smoke-admin.mjs
+```
 
 另外，`pnpm verify:api` 会针对运行中的后端做一次完整链路冒烟，
 覆盖静态资源托管等前端测试碰不到的环节。
@@ -297,5 +352,5 @@ curl http://localhost:3000/api/health
 
 ## 下一阶段
 
-Phase 4 管理后台：独立的 Vue 3 应用，实现后台登录、用户管理、商品管理与分类管理。
-其中「商品下架 / 恢复 / 删除」会写入 `admin_actions` 表，保证操作可追溯。
+Phase 5 测试与优化：边界与异常用例、性能（索引与列表接口耗时、首屏体积）、
+可访问性与一致性走查、安全加固（接口限流、输入校验、安全响应头、越权复查）。

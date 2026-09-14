@@ -1,7 +1,6 @@
 import type { AuthResult, CurrentUser, LoginPayload, RegisterPayload } from '@campus/shared'
-import { isAppError } from '@/utils/error'
-import { http, requestData } from './http'
-import { clearToken, getToken, setToken } from './token'
+import { http, requestData } from '../http.js'
+import { clearToken, getToken, setToken } from '../token.js'
 
 export async function login(payload: LoginPayload): Promise<AuthResult> {
   const result = await requestData<AuthResult>({ url: '/auth/login', method: 'POST', data: payload })
@@ -39,7 +38,8 @@ export async function fetchCurrentUser(): Promise<CurrentUser | null> {
   try {
     return await requestData<CurrentUser>({ url: '/auth/me' })
   } catch (error) {
-    if (isAppError(error) && (error.status === 401 || error.status === 403)) return null
+    const status = (error as { status?: number }).status
+    if (status === 401 || status === 403) return null
     throw error
   }
 }

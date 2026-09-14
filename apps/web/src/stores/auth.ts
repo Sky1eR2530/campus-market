@@ -1,12 +1,12 @@
 import type { CurrentUser, LoginPayload, RegisterPayload } from '@campus/shared'
-import { defineStore } from 'pinia'
-import { computed, ref } from 'vue'
 import {
   fetchCurrentUser,
   login as apiLogin,
   logout as apiLogout,
   register as apiRegister
-} from '@/api/auth'
+} from '@campus/api-client'
+import { defineStore } from 'pinia'
+import { computed, ref } from 'vue'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<CurrentUser | null>(null)

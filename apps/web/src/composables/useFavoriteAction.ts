@@ -2,7 +2,7 @@ import type { Item } from '@campus/shared'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useFavoriteStore } from '@/stores/favorites'
-import { toErrorMessage } from '@/utils/error'
+import { toErrorMessage } from '@campus/api-client'
 import { useToast } from './useToast'
 
 /**

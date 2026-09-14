@@ -14,8 +14,15 @@ export default defineConfig(({ mode }) => {
         // 共享包直接消费 TypeScript 源码，后端消费构建产物
         '@campus/shared': fileURLToPath(
           new URL('../../packages/shared/src/index.ts', import.meta.url)
-        )
-      }
+        ),
+        // 两个前端应用共用同一套设计令牌与 HTTP 客户端，避免各写一份
+      '@campus/api-client': fileURLToPath(
+        new URL('../../packages/api-client/src/index.ts', import.meta.url)
+      ),
+      // 更具体的路径写在前面，否则样式子路径会被上一条规则吞掉
+      '@campus/ui/styles': fileURLToPath(new URL('../../packages/ui/styles', import.meta.url)),
+      '@campus/ui': fileURLToPath(new URL('../../packages/ui/src/index.ts', import.meta.url))
+    }
     },
     server: {
       port: 5173,

@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { Item } from '@campus/shared'
-import AppEmpty from '@/components/ui/AppEmpty.vue'
-import AppErrorState from '@/components/ui/AppErrorState.vue'
+import { AppEmpty, AppErrorState } from '@campus/ui'
 import ItemCard from './ItemCard.vue'
 import ItemCardSkeleton from './ItemCardSkeleton.vue'
 

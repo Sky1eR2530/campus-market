@@ -19,7 +19,10 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@campus/shared": ["../../packages/shared/src/index.ts"]
+      "@campus/shared": ["../../packages/shared/src/index.ts"],
+      "@campus/api-client": ["../../packages/api-client/src/index.ts"],
+      "@campus/ui": ["../../packages/ui/src/index.ts"],
+      "@campus/ui/styles/*": ["../../packages/ui/styles/*"]
     }
   },
   "include": ["src/**/*.ts", "src/**/*.vue", "env.d.ts", "vite.config.ts"]

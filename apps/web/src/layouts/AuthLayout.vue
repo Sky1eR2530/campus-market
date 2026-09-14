@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { APP_DESCRIPTION, APP_TAGLINE } from '@campus/shared'
-import AppIcon from '@/components/ui/AppIcon.vue'
-import type { IconName } from '@/components/ui/icons'
+import { AppIcon } from '@campus/ui'
+import type { IconName } from '@campus/ui'
 import AppLogo from '@/components/layout/AppLogo.vue'
 
 const HIGHLIGHTS: { icon: IconName; title: string; desc: string }[] = [

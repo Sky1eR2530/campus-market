@@ -66,3 +66,6 @@ export const PRICE_MAX_CENTS = 9_999_999
 /** 图片上传限制 */
 export const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp']
 export const MAX_IMAGE_BYTES = 5 * 1024 * 1024
+
+/** 后台操作原因的最大长度 */
+export const ADMIN_REASON_MAX = 200

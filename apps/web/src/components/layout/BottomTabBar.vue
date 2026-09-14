@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
-import AppIcon from '@/components/ui/AppIcon.vue'
-import type { IconName } from '@/components/ui/icons'
+import { AppIcon } from '@campus/ui'
+import type { IconName } from '@campus/ui'
 import { useFavoriteStore } from '@/stores/favorites'
 
 const route = useRoute()

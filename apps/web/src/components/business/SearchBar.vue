@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import AppIcon from '@/components/ui/AppIcon.vue'
+import { AppIcon } from '@campus/ui'
 
 const props = withDefaults(
   defineProps<{

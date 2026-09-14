@@ -5,6 +5,7 @@ import { storagePublicDir } from './lib/storage/index.js'
 import { errorHandler, notFoundHandler } from './middlewares/errorHandler.js'
 import { requestLogger } from './middlewares/requestLogger.js'
 import { authRouter } from './modules/auth/auth.router.js'
+import { adminRouter } from './modules/admin/admin.router.js'
 import { categoryRouter } from './modules/categories/category.router.js'
 import { favoriteRouter } from './modules/favorites/favorite.router.js'
 import { healthRouter } from './modules/health/health.router.js'
@@ -30,6 +31,7 @@ export function createApp(): Express {
   )
 
   app.use('/api/health', healthRouter)
+  app.use('/api/admin', adminRouter)
   app.use('/api/auth', authRouter)
   app.use('/api/categories', categoryRouter)
   app.use('/api/items', itemRouter)

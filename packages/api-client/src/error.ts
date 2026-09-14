@@ -1,5 +1,7 @@
 import { AppError } from '@campus/shared'
 
+/** 判断异常是否是后端返回的业务错误 */
+
 export function isAppError(error: unknown): error is AppError {
   return error instanceof AppError
 }

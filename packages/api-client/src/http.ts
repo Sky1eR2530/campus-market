@@ -1,16 +1,26 @@
 import { AppError, ERROR_CODES } from '@campus/shared'
 import type { ErrorCode, Paginated } from '@campus/shared'
 import axios from 'axios'
-import type { AxiosError, AxiosRequestConfig, AxiosInstance } from 'axios'
+import type { AxiosError, AxiosInstance, AxiosRequestConfig } from 'axios'
 import { clearToken, getToken } from './token'
 
-const baseURL = import.meta.env.VITE_API_BASE_URL ?? '/api'
-
 export const http: AxiosInstance = axios.create({
-  baseURL,
+  // 默认与前端同源；由各应用在启动时通过 configureApiClient 覆盖
+  baseURL: '/api',
   timeout: 15_000,
   headers: { Accept: 'application/json' }
 })
+
+/**
+ * 由各应用在启动时注入自己的配置。
+ * 这个包因此不需要知道 Vite（或其它构建工具）的环境变量约定，
+ * 也避免了与应用自身的 env.d.ts 产生全局类型冲突。
+ */
+export function configureApiClient(options: { baseURL?: string }): void {
+  if (options.baseURL) {
+    http.defaults.baseURL = options.baseURL
+  }
+}
 
 http.interceptors.request.use((config) => {
   const token = getToken()
@@ -22,7 +32,8 @@ http.interceptors.request.use((config) => {
 
 /**
  * 令牌失效时的回调。
- * 通过注册而不是直接 import store，避免 http ↔ store ↔ api 形成循环依赖。
+ * 通过注册而不是直接依赖各应用的状态管理，避免 http ↔ store ↔ api 形成循环引用；
+ * 学生端与管理端也可以各自决定跳转到哪个登录页。
  */
 let onUnauthorized: (() => void) | null = null
 
@@ -71,9 +82,7 @@ http.interceptors.response.use(
       )
     }
 
-    return Promise.reject(
-      new AppError(ERROR_CODES.INTERNAL_ERROR, error.message, status ?? 500)
-    )
+    return Promise.reject(new AppError(ERROR_CODES.INTERNAL_ERROR, error.message, status ?? 500))
   }
 )
 

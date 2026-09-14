@@ -6,7 +6,7 @@ import type {
   Paginated,
   UpdateItemPayload
 } from '@campus/shared'
-import { http, requestData, requestList } from './http'
+import { http, requestData, requestList } from '../http.js'
 
 export function fetchItems(query: ItemQuery = {}): Promise<Paginated<Item>> {
   // axios 会自动忽略值为 undefined 的查询参数

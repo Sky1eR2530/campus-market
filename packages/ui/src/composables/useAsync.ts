@@ -1,6 +1,6 @@
+import { toErrorMessage } from '@campus/api-client'
 import type { Ref } from 'vue'
 import { ref, shallowRef } from 'vue'
-import { toErrorMessage } from '@/utils/error'
 
 export interface UseAsyncResult<T> {
   data: Ref<T | null>

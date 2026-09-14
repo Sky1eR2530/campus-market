@@ -2,14 +2,13 @@
 import { profileSchema } from '@campus/shared'
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { updateProfile } from '@/api/users'
-import AppButton from '@/components/ui/AppButton.vue'
-import AppIcon from '@/components/ui/AppIcon.vue'
+import { updateProfile } from '@campus/api-client'
+import { AppButton, AppIcon } from '@campus/ui'
 import AppInput from '@/components/ui/AppInput.vue'
 import AppTextarea from '@/components/ui/AppTextarea.vue'
 import { useToast } from '@/composables/useToast'
 import { useAuthStore } from '@/stores/auth'
-import { toErrorMessage } from '@/utils/error'
+import { toErrorMessage } from '@campus/api-client'
 import { shouldShowError, validate } from '@/utils/validation'
 
 const auth = useAuthStore()

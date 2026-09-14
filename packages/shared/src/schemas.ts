@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import {
+  ADMIN_REASON_MAX,
   BIO_MAX,
   DESCRIPTION_MAX,
   DESCRIPTION_MIN,
@@ -188,3 +189,44 @@ export const updateProfilePayloadSchema = z.object({
 })
 
 export type UpdateProfilePayloadValues = z.infer<typeof updateProfilePayloadSchema>
+
+// ---------------------------------------------------------------------------
+// 管理后台
+// ---------------------------------------------------------------------------
+
+const adminReason = z
+  .string()
+  .trim()
+  .max(ADMIN_REASON_MAX, `说明最多 ${ADMIN_REASON_MAX} 个字`)
+  .optional()
+
+export const adminUpdateUserStatusSchema = z.object({
+  status: z.enum(['active', 'banned'], { error: '状态只能是 active 或 banned' }),
+  reason: adminReason
+})
+
+export const adminUpdateItemStatusSchema = z.object({
+  status: itemStatusRule,
+  reason: adminReason
+})
+
+export const adminDeleteSchema = z.object({ reason: adminReason })
+
+export const createCategorySchema = z.object({
+  slug: z
+    .string()
+    .trim()
+    .min(2, '标识至少 2 个字符')
+    .max(40, '标识最多 40 个字符')
+    // 分类标识会出现在 URL 里，限制为小写字母、数字与连字符
+    .regex(/^[a-z0-9-]+$/, '标识只能包含小写字母、数字和连字符'),
+  name: z.string().trim().min(1, '请输入分类名称').max(20, '分类名称最多 20 个字'),
+  icon: z.string().trim().min(1, '请选择图标').max(50),
+  sortOrder: z.coerce.number().int().min(0).max(999).default(0),
+  isActive: z.boolean().default(true)
+})
+
+export const updateCategorySchema = createCategorySchema.partial()
+
+export type CreateCategoryValues = z.infer<typeof createCategorySchema>
+export type UpdateCategoryValues = z.infer<typeof updateCategorySchema>

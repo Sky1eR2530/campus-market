@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { hashHue, initialsOf } from '@/utils/format'
+import { hashHue, initialsOf } from '@campus/shared'
 
 const props = withDefaults(
   defineProps<{

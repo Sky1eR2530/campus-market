@@ -1,5 +1,5 @@
 import type { CurrentUser, MyStats, SellerProfile, UpdateProfilePayload } from '@campus/shared'
-import { requestData } from './http'
+import { requestData } from '../http.js'
 
 export function fetchSellerProfile(userId: string): Promise<SellerProfile> {
   return requestData<SellerProfile>({ url: `/users/${userId}` })

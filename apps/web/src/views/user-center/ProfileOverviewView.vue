@@ -2,14 +2,12 @@
 import type { MyStats } from '@campus/shared'
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { fetchMyStats } from '@/api/users'
-import AppErrorState from '@/components/ui/AppErrorState.vue'
-import AppIcon from '@/components/ui/AppIcon.vue'
-import type { IconName } from '@/components/ui/icons'
-import { useAsync } from '@/composables/useAsync'
+import { fetchMyStats } from '@campus/api-client'
+import { AppErrorState, AppIcon, useAsync } from '@campus/ui'
+import type { IconName } from '@campus/ui'
 import { usePageMeta } from '@/composables/usePageMeta'
 import { useAuthStore } from '@/stores/auth'
-import { formatDate } from '@/utils/format'
+import { formatDate } from '@campus/shared'
 
 const auth = useAuthStore()
 const router = useRouter()

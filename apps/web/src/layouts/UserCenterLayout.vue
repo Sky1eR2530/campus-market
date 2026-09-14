@@ -2,8 +2,8 @@
 import { computed } from 'vue'
 import { RouterView, useRoute } from 'vue-router'
 import AppAvatar from '@/components/ui/AppAvatar.vue'
-import AppIcon from '@/components/ui/AppIcon.vue'
-import type { IconName } from '@/components/ui/icons'
+import { AppIcon } from '@campus/ui'
+import type { IconName } from '@campus/ui'
 import { useAuthStore } from '@/stores/auth'
 import { useFavoriteStore } from '@/stores/favorites'
 

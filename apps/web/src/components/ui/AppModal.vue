@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { nextTick, onUnmounted, ref, watch } from 'vue'
-import AppIcon from './AppIcon.vue'
+import { AppIcon } from '@campus/ui'
 
 const props = withDefaults(
   defineProps<{

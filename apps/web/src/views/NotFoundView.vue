@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
-import AppButton from '@/components/ui/AppButton.vue'
-import AppIcon from '@/components/ui/AppIcon.vue'
+import { AppButton, AppIcon } from '@campus/ui'
 import { usePageMeta } from '@/composables/usePageMeta'
 
 const router = useRouter()

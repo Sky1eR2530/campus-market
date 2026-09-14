@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import type { Item } from '@campus/shared'
 import { computed } from 'vue'
-import AppIcon from '@/components/ui/AppIcon.vue'
-import AppSpinner from '@/components/ui/AppSpinner.vue'
+import { AppIcon, AppSpinner } from '@campus/ui'
 import { useFavoriteAction } from '@/composables/useFavoriteAction'
 
 const props = withDefaults(

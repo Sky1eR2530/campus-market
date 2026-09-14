@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import AppIcon from './AppIcon.vue'
-import AppSpinner from './AppSpinner.vue'
+import { AppIcon, AppSpinner } from '@campus/ui'
 import { uploadImage } from '@/api/uploads'
 import { useToast } from '@/composables/useToast'
-import { toErrorMessage } from '@/utils/error'
+import { toErrorMessage } from '@campus/api-client'
 
 const props = withDefaults(
   defineProps<{

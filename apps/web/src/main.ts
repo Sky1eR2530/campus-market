@@ -1,13 +1,13 @@
+import { configureApiClient, setUnauthorizedHandler } from '@campus/api-client'
+import '@campus/ui/styles/tokens.css'
+import '@campus/ui/styles/base.css'
+import '@campus/ui/styles/components.css'
+import '@campus/ui/styles/utilities.css'
 import { createPinia } from 'pinia'
 import { createApp } from 'vue'
 import App from './App.vue'
-import { setUnauthorizedHandler } from './api/http'
 import { router } from './router'
 import { useAuthStore } from './stores/auth'
-import './styles/tokens.css'
-import './styles/base.css'
-import './styles/components.css'
-import './styles/utilities.css'
 
 /**
  * 先恢复登录态再挂载，避免刷新受保护页面时先渲染出登录页再跳回来。
@@ -15,6 +15,8 @@ import './styles/utilities.css'
 async function bootstrap(): Promise<void> {
   const app = createApp(App)
   app.use(createPinia())
+
+  configureApiClient({ baseURL: import.meta.env.VITE_API_BASE_URL })
 
   const auth = useAuthStore()
 

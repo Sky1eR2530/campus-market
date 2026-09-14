@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import AppButton from './AppButton.vue'
-import AppIcon from './AppIcon.vue'
+import { AppButton, AppIcon } from '@campus/ui'
+import type { IconName } from '@campus/ui'
 import AppModal from './AppModal.vue'
-import type { IconName } from './icons'
 
 withDefaults(
   defineProps<{

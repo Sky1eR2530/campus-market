@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import AppIcon from './AppIcon.vue'
+import { AppIcon } from '@campus/ui'
+import type { IconName } from '@campus/ui'
 import { useUiStore } from '@/stores/ui'
-import type { IconName } from './icons'
 
 const ui = useUiStore()
 

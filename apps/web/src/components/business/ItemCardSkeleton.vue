@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import AppSkeleton from '@/components/ui/AppSkeleton.vue'
+import { AppSkeleton } from '@campus/ui'
 </script>
 
 <template>

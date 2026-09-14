@@ -5,7 +5,7 @@ import AppImage from '@/components/ui/AppImage.vue'
 import FavoriteButton from './FavoriteButton.vue'
 import ItemStatusTag from './ItemStatusTag.vue'
 import PriceText from './PriceText.vue'
-import { formatRelativeTime } from '@/utils/format'
+import { formatRelativeTime } from '@campus/shared'
 
 const props = defineProps<{ item: Item }>()
 

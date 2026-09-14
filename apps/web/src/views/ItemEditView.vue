@@ -2,17 +2,13 @@
 import type { CreateItemPayload } from '@campus/shared'
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { fetchItem, updateItem } from '@/api/items'
+import { fetchItem, updateItem } from '@campus/api-client'
 import ItemForm from '@/components/business/ItemForm.vue'
-import AppButton from '@/components/ui/AppButton.vue'
-import AppEmpty from '@/components/ui/AppEmpty.vue'
-import AppErrorState from '@/components/ui/AppErrorState.vue'
-import AppSkeleton from '@/components/ui/AppSkeleton.vue'
-import { useAsync } from '@/composables/useAsync'
+import { AppButton, AppEmpty, AppErrorState, AppSkeleton, useAsync } from '@campus/ui'
 import { usePageMeta } from '@/composables/usePageMeta'
 import { useToast } from '@/composables/useToast'
 import { useAuthStore } from '@/stores/auth'
-import { toErrorMessage } from '@/utils/error'
+import { toErrorMessage } from '@campus/api-client'
 
 const route = useRoute()
 const router = useRouter()

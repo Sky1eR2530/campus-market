@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import type { SellerProfile } from '@campus/shared'
 import AppAvatar from '@/components/ui/AppAvatar.vue'
-import AppIcon from '@/components/ui/AppIcon.vue'
-import { formatDate } from '@/utils/format'
+import { AppIcon } from '@campus/ui'
+import { formatDate } from '@campus/shared'
 
 defineProps<{ seller: SellerProfile }>()
 </script>

@@ -1,16 +1,12 @@
 <script setup lang="ts">
 import type { Item } from '@campus/shared'
 import { computed, ref } from 'vue'
-import { fetchFavorites } from '@/api/favorites'
+import { fetchFavorites } from '@campus/api-client'
 import ItemGrid from '@/components/business/ItemGrid.vue'
-import AppEmpty from '@/components/ui/AppEmpty.vue'
-import AppErrorState from '@/components/ui/AppErrorState.vue'
-import AppIcon from '@/components/ui/AppIcon.vue'
-import AppPagination from '@/components/ui/AppPagination.vue'
-import { useAsync } from '@/composables/useAsync'
+import { AppEmpty, AppErrorState, AppIcon, AppPagination, useAsync } from '@campus/ui'
 import { useToast } from '@/composables/useToast'
 import { useFavoriteStore } from '@/stores/favorites'
-import { toErrorMessage } from '@/utils/error'
+import { toErrorMessage } from '@campus/api-client'
 
 const favorites = useFavoriteStore()
 const toast = useToast()

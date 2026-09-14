@@ -145,3 +145,82 @@ export interface MyStats {
   offShelf: number
   favorites: number
 }
+
+// ---------------------------------------------------------------------------
+// 管理后台
+// ---------------------------------------------------------------------------
+
+export type AdminTargetType = 'user' | 'item'
+
+/** 后台视角的分类：比前台多一个启用状态（前台只返回启用中的分类） */
+export interface AdminCategory extends Category {
+  isActive: boolean
+}
+
+/** 后台数据概览 */
+export interface AdminStats {
+  users: { total: number; banned: number; active: number }
+  items: { total: number; onSale: number; sold: number; offShelf: number; deleted: number }
+  categories: number
+  favorites: number
+}
+
+export interface AdminUser {
+  id: string
+  email: string
+  nickname: string
+  role: UserRole
+  status: UserStatus
+  school: string | null
+  campus: string | null
+  createdAt: string
+  lastLoginAt: string | null
+  /** 该用户发布的商品数量（不含已删除） */
+  itemCount: number
+}
+
+export interface AdminItem {
+  id: string
+  title: string
+  priceCents: number
+  status: ItemStatus
+  categoryName: string
+  sellerId: string
+  sellerNickname: string
+  /** 封面图，便于后台快速辨认 */
+  coverUrl: string | null
+  favoriteCount: number
+  viewCount: number
+  publishedAt: string
+  createdAt: string
+  deletedAt: string | null
+}
+
+export interface AdminActionLog {
+  id: string
+  adminId: string
+  adminNickname: string
+  targetType: AdminTargetType
+  targetId: string
+  action: string
+  reason: string | null
+  createdAt: string
+}
+
+export interface AdminUserQuery {
+  q?: string
+  status?: UserStatus
+  role?: UserRole
+  page?: number
+  pageSize?: number
+}
+
+export interface AdminItemQuery {
+  q?: string
+  status?: ItemStatus
+  category?: string
+  /** 是否包含已软删除的商品 */
+  includeDeleted?: boolean
+  page?: number
+  pageSize?: number
+}

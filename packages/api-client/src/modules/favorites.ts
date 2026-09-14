@@ -1,5 +1,5 @@
 import type { Item, Paginated } from '@campus/shared'
-import { requestData, requestList } from './http'
+import { requestData, requestList } from '../http.js'
 
 interface FavoriteState {
   favorited: boolean

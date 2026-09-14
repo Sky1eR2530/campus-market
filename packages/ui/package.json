@@ -1,0 +1,30 @@
+{
+  "name": "@campus/ui",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "学生端与管理端共用的设计令牌、基础样式与基础组件",
+  "files": ["styles", "src"],
+  "exports": {
+    ".": "./src/index.ts",
+    "./styles/tokens.css": "./styles/tokens.css",
+    "./styles/base.css": "./styles/base.css",
+    "./styles/components.css": "./styles/components.css",
+    "./styles/utilities.css": "./styles/utilities.css"
+  },
+  "scripts": {
+    "typecheck": "vue-tsc --noEmit -p tsconfig.json"
+  },
+  "peerDependencies": {
+    "vue": "^3.5.0"
+  },
+  "dependencies": {
+    "@campus/api-client": "workspace:*",
+    "@campus/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "vue": "^3.5.42",
+    "vue-tsc": "^3.3.11"
+  }
+}

@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import type { Category } from '@campus/shared'
 import { computed } from 'vue'
-import AppIcon from '@/components/ui/AppIcon.vue'
-import { CATEGORY_ICON_NAMES } from '@/components/ui/icons'
+import { AppIcon, CATEGORY_ICON_NAMES } from '@campus/ui'
 
 const props = defineProps<{ category: Category; showCount?: boolean }>()
 

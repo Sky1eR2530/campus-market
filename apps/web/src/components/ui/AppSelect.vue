@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import AppIcon from './AppIcon.vue'
+import { AppIcon } from '@campus/ui'
 
 export interface SelectOption {
   value: string

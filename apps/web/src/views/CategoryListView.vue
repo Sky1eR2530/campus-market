@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import type { Category } from '@campus/shared'
 import { computed } from 'vue'
-import { fetchCategories } from '@/api/categories'
+import { fetchCategories } from '@campus/api-client'
 import CategoryCard from '@/components/business/CategoryCard.vue'
-import AppErrorState from '@/components/ui/AppErrorState.vue'
-import { useAsync } from '@/composables/useAsync'
+import { AppErrorState, useAsync } from '@campus/ui'
 import { usePageMeta } from '@/composables/usePageMeta'
 
 const categories = useAsync<Category[]>(fetchCategories)

@@ -1,0 +1,20 @@
+{
+  "name": "@campus/api-client",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "前后端之间的 HTTP 客户端与接口封装，被学生端与管理端共用",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@campus/shared": "workspace:*",
+    "axios": "^1.20.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}

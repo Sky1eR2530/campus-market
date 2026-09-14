@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import AppIcon from './AppIcon.vue'
-import type { IconName } from './icons'
+import { AppIcon } from '@campus/ui'
+import type { IconName } from '@campus/ui'
 
 const props = withDefaults(
   defineProps<{

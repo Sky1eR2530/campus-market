@@ -2,12 +2,12 @@
 import type { CreateItemPayload } from '@campus/shared'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { createItem } from '@/api/items'
+import { createItem } from '@campus/api-client'
 import ItemForm from '@/components/business/ItemForm.vue'
-import AppIcon from '@/components/ui/AppIcon.vue'
+import { AppIcon } from '@campus/ui'
 import { usePageMeta } from '@/composables/usePageMeta'
 import { useToast } from '@/composables/useToast'
-import { toErrorMessage } from '@/utils/error'
+import { toErrorMessage } from '@campus/api-client'
 
 const router = useRouter()
 const toast = useToast()

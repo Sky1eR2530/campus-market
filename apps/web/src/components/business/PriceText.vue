@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { formatPrice } from '@/utils/format'
+import { formatPrice } from '@campus/shared'
 
 const props = withDefaults(
   defineProps<{

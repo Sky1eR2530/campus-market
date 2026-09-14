@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import { ITEM_STATUS_META } from '@campus/shared'
 import type { ItemStatus } from '@campus/shared'
-import AppTag from '@/components/ui/AppTag.vue'
+import { AppTag } from '@campus/ui'
 
 const props = withDefaults(defineProps<{ status: ItemStatus; size?: 'sm' | 'lg' }>(), {
   size: 'sm'

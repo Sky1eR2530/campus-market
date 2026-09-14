@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
-import { addFavorite, fetchFavoriteIds, removeFavorite } from '@/api/favorites'
+import { addFavorite, fetchFavoriteIds, removeFavorite } from '@campus/api-client'
 
 /**
  * 收藏状态。
