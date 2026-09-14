@@ -57,10 +57,7 @@ jobs:
           cache: pnpm
 
       - name: 安装依赖
-        run: pnpm install --frozen-lockfile --config.allow-builds=@embedded-postgres/linux-x64
-
-      - name: 批准构建脚本
-        run: pnpm approve-builds --yes
+        run: pnpm install --frozen-lockfile
 
       - name: 构建共享包
         run: pnpm --filter @campus/shared build
