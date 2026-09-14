@@ -391,14 +391,19 @@ pnpm install --frozen-lockfile
 pnpm build
 pnpm typecheck
 
-# 2. 生产环境执行数据库迁移与种子数据（DATABASE_URL 指向托管数据库）
+# 2. 生产环境执行数据库迁移与种子数据
+#    推荐用仓库里的 GitHub Actions 工作流（Actions → 线上数据库初始化）：
+#    凭据存成 Actions Secrets，不需要本地能连上托管数据库。
+#    本地网络可以直连托管数据库时，也可以直接执行：
 pnpm db:deploy
 pnpm db:seed
+#    种子数据会把演示图片写进对象存储，因此本地执行时需要 STORAGE_DRIVER=s3 及对应的 S3_* 变量。
 
 # 3. 平台侧配置
 #    Build Command:  pnpm install --frozen-lockfile && pnpm build
 #    Start Command:  pnpm start
 #    Health Check:   /api/health
+#    Region:         与数据库同区域（Neon ap-southeast-1 → Render Singapore）
 ```
 
 生产构建会自动把管理端打到 `/admin/` 子路径（见 `apps/admin/vite.config.ts`），
