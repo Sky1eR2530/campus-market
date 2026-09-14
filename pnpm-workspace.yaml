@@ -1,3 +1,16 @@
 packages:
   - 'apps/*'
   - 'packages/*'
+
+# pnpm 默认阻止依赖执行安装脚本，这里逐个显式声明：
+#   esbuild                        → tsx 依赖，需要准备平台二进制
+#   prisma / @prisma/engines       → 准备数据库查询引擎
+#   @embedded-postgres/windows-x64 → 本地开发数据库，需要解压并链接 PostgreSQL 二进制
+#   workerd / msgpackr-extract     → 与本项目无关的传递依赖，明确禁止执行
+allowBuilds:
+  esbuild: true
+  prisma: true
+  '@prisma/engines': true
+  '@embedded-postgres/windows-x64': true
+  workerd: false
+  msgpackr-extract: false

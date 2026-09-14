@@ -20,11 +20,14 @@ export type ErrorCode = (typeof ERROR_CODES)[keyof typeof ERROR_CODES]
 export class AppError extends Error {
   readonly code: ErrorCode
   readonly status: number
+  /** 附加信息，例如字段级校验失败清单 */
+  readonly details: unknown
 
-  constructor(code: ErrorCode, message: string, status = 400) {
+  constructor(code: ErrorCode, message: string, status = 400, details: unknown = null) {
     super(message)
     this.name = 'AppError'
     this.code = code
     this.status = status
+    this.details = details
   }
 }

@@ -9,8 +9,18 @@
   },
   "scripts": {
     "dev": "pnpm --filter @campus/web dev",
-    "build": "pnpm --filter @campus/web build",
+    "dev:web": "pnpm --filter @campus/web dev",
+    "dev:api": "pnpm --filter @campus/shared build && pnpm --filter @campus/api dev",
+    "build": "pnpm --filter @campus/shared build && pnpm --filter @campus/web build && pnpm --filter @campus/api build",
+    "build:web": "pnpm --filter @campus/web build",
+    "build:api": "pnpm --filter @campus/shared build && pnpm --filter @campus/api build",
     "preview": "pnpm --filter @campus/web preview",
-    "typecheck": "pnpm -r typecheck"
+    "typecheck": "pnpm -r typecheck",
+    "db:local": "pnpm --filter @campus/api local-db",
+    "db:generate": "pnpm --filter @campus/api db:generate",
+    "db:migrate": "pnpm --filter @campus/api db:migrate",
+    "db:seed": "pnpm --filter @campus/api db:seed",
+    "db:reset": "pnpm --filter @campus/api db:reset",
+    "db:studio": "pnpm --filter @campus/api db:studio"
   }
 }

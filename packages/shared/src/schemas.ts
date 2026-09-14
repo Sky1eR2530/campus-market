@@ -10,7 +10,7 @@ import {
   PRICE_MAX_CENTS,
   TITLE_MAX,
   TITLE_MIN
-} from './constants'
+} from './constants.js'
 
 /**
  * 前后端共用的校验规则。

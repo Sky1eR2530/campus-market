@@ -1,4 +1,4 @@
-import type { ItemStatus, SortOption } from './types'
+import type { ItemStatus, SortOption } from './types.js'
 
 /** 平台名称与标语，多处复用，避免散落硬编码 */
 export const APP_NAME = '校园淘'
