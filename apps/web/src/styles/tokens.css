@@ -1,0 +1,146 @@
+/* ===========================================================================
+   设计令牌
+   ---------------------------------------------------------------------------
+   所有颜色、间距、圆角、阴影只在这里定义一次，组件内通过 var() 引用。
+   调整视觉风格只需改这一个文件，不会出现散落各处的硬编码色值。
+   =========================================================================== */
+
+:root {
+  /* ---------- 品牌色：深皇家蓝，用于主按钮、链接、选中态 ---------- */
+  --color-primary-50: #f2f5ff;
+  --color-primary-100: #e3e9ff;
+  --color-primary-200: #c6d2ff;
+  --color-primary-300: #9fb0fb;
+  --color-primary-400: #7189f5;
+  --color-primary-500: #4a66e8;
+  --color-primary-600: #2a4fd8;
+  --color-primary-700: #1f3ca8;
+  --color-primary-800: #182e7f;
+  --color-primary: var(--color-primary-600);
+  --color-primary-hover: var(--color-primary-700);
+
+  /* ---------- 强调色：价格专用，与品牌色区分 ---------- */
+  --color-accent-50: #fff1ec;
+  --color-accent-500: #f2542d;
+  --color-accent-600: #d93f19;
+  --color-accent: var(--color-accent-500);
+
+  /* ---------- 中性色阶：承担 90% 的界面 ---------- */
+  --color-neutral-0: #ffffff;
+  --color-neutral-25: #fbfcfd;
+  --color-neutral-50: #f6f8fa;
+  --color-neutral-100: #eef1f5;
+  --color-neutral-200: #e1e5ec;
+  --color-neutral-300: #c8cfda;
+  --color-neutral-400: #98a2b3;
+  --color-neutral-500: #6b7688;
+  --color-neutral-600: #4e5866;
+  --color-neutral-700: #38414e;
+  --color-neutral-800: #232a34;
+  --color-neutral-900: #141a22;
+
+  /* ---------- 语义色 ---------- */
+  --color-success-50: #e7f7f0;
+  --color-success-500: #10a16e;
+  --color-success-700: #0a6f4c;
+  --color-warning-50: #fff5e6;
+  --color-warning-500: #d97a0b;
+  --color-warning-700: #9a5606;
+  --color-danger-50: #feecec;
+  --color-danger-500: #dc3545;
+  --color-danger-700: #a3202d;
+
+  /* ---------- 语义化映射：组件里优先用这一组 ---------- */
+  --bg-page: var(--color-neutral-50);
+  --bg-surface: var(--color-neutral-0);
+  --bg-subtle: var(--color-neutral-100);
+  --bg-hover: var(--color-neutral-100);
+  --border-default: var(--color-neutral-200);
+  --border-strong: var(--color-neutral-300);
+  --text-primary: var(--color-neutral-900);
+  --text-secondary: var(--color-neutral-600);
+  --text-tertiary: var(--color-neutral-500);
+  --text-placeholder: var(--color-neutral-400);
+  --text-inverse: var(--color-neutral-0);
+
+  /* ---------- 字号 ---------- */
+  --text-xs: 0.75rem;
+  --text-sm: 0.8125rem;
+  --text-base: 0.875rem;
+  --text-md: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.375rem;
+  --text-2xl: 1.75rem;
+
+  --leading-tight: 1.25;
+  --leading-normal: 1.55;
+  --leading-relaxed: 1.75;
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  /* ---------- 间距：4px 基准刻度 ---------- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* ---------- 圆角：卡片 12 / 控件 8 ---------- */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 999px;
+
+  /* ---------- 阴影：只用两级，避免层次混乱 ---------- */
+  --shadow-xs: 0 1px 2px rgba(16, 24, 40, 0.05);
+  --shadow-sm: 0 1px 3px rgba(16, 24, 40, 0.07), 0 1px 2px rgba(16, 24, 40, 0.04);
+  --shadow-md: 0 6px 16px rgba(16, 24, 40, 0.09), 0 2px 5px rgba(16, 24, 40, 0.05);
+  --shadow-lg: 0 16px 40px rgba(16, 24, 40, 0.14), 0 4px 12px rgba(16, 24, 40, 0.06);
+  --shadow-focus: 0 0 0 3px var(--color-primary-200);
+
+  /* ---------- 动效 ---------- */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-fast: 140ms ease;
+  --transition-base: 220ms var(--ease-out);
+
+  /* ---------- 布局 ---------- */
+  --container-max: 1200px;
+  --container-padding: var(--space-4);
+  --header-height: 56px;
+  --tabbar-height: 56px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+
+  /* ---------- 层级 ---------- */
+  --z-header: 100;
+  --z-tabbar: 100;
+  --z-dropdown: 200;
+  --z-modal: 300;
+  --z-toast: 400;
+
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB',
+    'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --container-padding: var(--space-6);
+    --header-height: 64px;
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --container-padding: var(--space-8);
+    --header-height: 68px;
+  }
+}

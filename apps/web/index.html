@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="description" content="校园淘 —— 面向在校学生的闲置物品信息平台，同校闲置快速流转。" />
+    <meta name="format-detection" content="telephone=no" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <title>校园淘 · 同校闲置，快速流转</title>
+    <style>
+      /* 首屏骨架：在 JS 加载完成前提供与最终布局一致的背景，避免白屏闪烁 */
+      html,
+      body {
+        margin: 0;
+        background: #f6f8fa;
+      }
+      #app:empty::after {
+        content: '';
+        display: block;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, #2a4fd8, #4a66e8);
+        animation: boot-progress 1.4s ease-in-out infinite;
+        transform-origin: left center;
+      }
+      @keyframes boot-progress {
+        0% {
+          transform: scaleX(0.05);
+          opacity: 0.6;
+        }
+        60% {
+          transform: scaleX(0.75);
+          opacity: 1;
+        }
+        100% {
+          transform: scaleX(1);
+          opacity: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

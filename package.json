@@ -1,0 +1,16 @@
+{
+  "name": "campus-market",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "校园闲置与生活信息服务平台",
+  "engines": {
+    "node": ">=20.19"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @campus/web dev",
+    "build": "pnpm --filter @campus/web build",
+    "preview": "pnpm --filter @campus/web preview",
+    "typecheck": "pnpm -r typecheck"
+  }
+}
